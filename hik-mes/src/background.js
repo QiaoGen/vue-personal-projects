@@ -18,7 +18,7 @@ mysql.connect()
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const connectPLC = function () {
-  s7client.ConnectTo('192.168.2.1').then(res => {
+  s7client.ConnectTo('10.69.156.101').then(res => {
     PLCInfo.plcConnetStatus = res
   }).catch(err => {
     PLCInfo.plcConnetStatus = err

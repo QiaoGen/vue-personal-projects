@@ -33,6 +33,7 @@ import constant from '@/lib/constant'
 import store from '@/store'
 import utils from '@/utils/utils';
 import dayjs from 'dayjs'
+import s7client from '@/lib/s7client';
 
 
 
@@ -91,10 +92,12 @@ ipcRenderer.on('sysInfo-reply', function (event, arg) {
 
 //心跳
 const heartbeat = setInterval(() => {
-  console.log('heartbeat')
+  s7client.write('plc-msg-invoke', 'write', constant.plcCommand.heartbeat, Buffer.from([1])).then(res => {
+    console.log('heartbeat')
+  })
   // getIPPortStatus()
   //发送心跳同时发送设备运行状态,检测plc/tcp连接状态 ping ip port
-}, 10000);
+}, 2000);
 
 //-------告警信息
 // const conAlarms = ref(constant.alarms)

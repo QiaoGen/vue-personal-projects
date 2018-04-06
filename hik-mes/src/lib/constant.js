@@ -185,6 +185,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 const plcCommand = !isDevelopment ? {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 4800, amount: 1, desc: '序列号标识位', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 4801, amount: 1, desc: '序列号错误标识位', name: 'barcdSignError' },
+    heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 4803, amount: 1, desc: '心跳', name: 'heartbeat' },
     barcd: { area: areas.DB, dbNumber: 16, start: 0, size: 20, desc: '序列号', name: 'barcd' },//size => byte
     weightSign: { area: areas.M, wordLen: wordLens.bit, start: 4808, amount: 1, desc: '称重标识位', name: 'weightSign' },
     weight: { area: areas.M, wordLen: wordLens.byte, start: 700, amount: 4, desc: '称重数据', name: 'weight' },
@@ -193,6 +194,7 @@ const plcCommand = !isDevelopment ? {
 } : {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
+    heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 4803, amount: 1, desc: '心跳', name: 'heartbeat' },
     barcd: { area: areas.DB, dbNumber: 1, start: 0, size: 5, desc: '序列号', reply: 'barcd_reply' },//size => b,},//size => byte
     weightSign: { area: areas.M, wordLen: wordLens.bit, start: 34, amount: 1, desc: '称重标识位', reply: 'weightSign_reply', name: 'weightSign' },
     weight: { area: areas.M, wordLen: wordLens.byte, start: 20, amount: 4, desc: '称重数据', reply: 'weight_reply', name: 'weight' },

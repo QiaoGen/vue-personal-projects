@@ -11,7 +11,7 @@
                 <div style="display: flex;align-items: center;margin-bottom: 10px;">
                     <div>校验标志</div>
                     <div :class="barcdStatus ? 'point_green' : 'point'"></div>
-                    <!-- <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button> -->
+                    <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button>
                 </div>
             </div>
             <message-window ref="barcdMsgWindow" class="msg_window"></message-window>
@@ -349,20 +349,19 @@ const addBarcdToDB = function (barcdTemp) {
 }
 //验证操作
 const validBarcd = function (barcd) {
-    hik.validBarcd(barcd).then(res => {
-
+    soapClient.valid(barcd).then(res => {
         // ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
-        mesValidMsg.value = 'MES校验成功'
+        mesValidMsg.value = '校验序列号:' + barcd + ":" + res.ErrMsg
         ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd])).then(addRes => {
             console.log(addRes)
         })
         resetBarcdSign()
         addBarcdMsg('mes', res, 'info')
     }).catch(err => {
-        mesValidMsg.value = 'MES校验失败：' + err
+        mesValidMsg.value = 'MES校验失败：' + err.ErrMsg + " Code:" + err.ErrCode
         plcBarcdSignError()
         resetBarcdSign()
-        addBarcdMsg('mes', res, 'error')
+        addBarcdMsg('mes', err, 'error')
     })
 }
 
@@ -390,16 +389,22 @@ const plcBarcdSignError = function () {
     })
 }
 
+//去除重复打印信息
+var lastBarcdMsg = null
+var lastPkgdMsg = null
 function addBarcdMsg(type, msg, info) {
     let param = {
         type,
         msg,
         info
     }
-    tthis.$refs.barcdMsgWindow.sendMessage(param)
-    // if (info == 'error') {
-    //     barcdStatus.value = false
-    // }
+    if (msg != lastBarcdMsg) {
+        tthis.$refs.barcdMsgWindow.sendMessage(param)
+    }
+    lastBarcdMsg = msg
+    if (info == 'error') {
+        barcdStatus.value = false
+    }
 }
 function addPkgNumberMsg(type, msg, info) {
     let param = {
@@ -407,14 +412,15 @@ function addPkgNumberMsg(type, msg, info) {
         msg,
         info
     }
-    tthis.$refs.weightMsgWindow.sendMessage(param)
+    if (msg != lastPkgdMsg) {
+        tthis.$refs.weightMsgWindow.sendMessage(param)
+    }
+    lastBarcdMsg = msg
     if (info == 'error') {
         pkgNumberStatus.value = false
         printStatus.value = false
     }
 }
-
-
 
 //清除报错
 const clearError = function () {
@@ -422,8 +428,6 @@ const clearError = function () {
     mesValidMsg.value = null
     barcdStatus.value = true
 }
-
-
 
 //删除待验证工单
 const deleteValidBarcd = function () {

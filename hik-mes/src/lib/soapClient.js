@@ -43,20 +43,29 @@ function uuid() {
 }
 
 
-function valid(data) {
+function valid(barcd) {
     return new Promise((reslove, reject) => {
         soap.createClient(url, (err, client) => {
             if (err) {
                 reject(err)
                 console.error(err)
             } else {
-                validArgs.Data = data
+                let param = {
+                    "Barcd": barcd,
+                    "Aufnr": "YES"
+                }
+                validArgs.Data = param
                 validArgs.Id = uuid()
-                client.execute({ data: JSON.stringify(args) }, function (err1, result) {
+                client.execute({ data: JSON.stringify(validArgs) }, function (err1, result) {
                     if (err1) {
                         reject(err1)
                     } else {
-                        reslove(JSON.parse(result.return))
+                        let resultData = JSON.parse(result.return)
+                        if (resultData.ErrCode == '0') {
+                            reslove(resultData)
+                        } else {
+                            reject(resultData)
+                        }
                     }
                 })
             }
@@ -96,7 +105,12 @@ function sendPkgNumber(data) {
                     if (err1) {
                         reject(err1)
                     } else {
-                        reslove(JSON.parse(result.return))
+                        let resultData = JSON.parse(result.return)
+                        if (resultData.ErrCode == '0') {
+                            reslove(resultData)
+                        } else {
+                            reject(resultData)
+                        }
                     }
                 })
             }
