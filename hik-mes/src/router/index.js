@@ -4,7 +4,20 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: ()=> import('@/views/Home.vue')
+    redirect: '/operation',
+    component: ()=> import('@/views/Home.vue'),
+    children: [
+      {
+       path: '/logWindow',
+       name: 'logWindow',
+       component: () => import('@/views/logWindow.vue')
+      },
+      {
+        path: '/operation',
+        name: 'operation',
+        component: () => import('@/views/operation.vue')
+       }
+    ]
   }
   
 ]

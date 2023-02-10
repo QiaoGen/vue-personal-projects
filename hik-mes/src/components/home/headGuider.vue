@@ -1,14 +1,27 @@
 <template>
   <div class="head">
-    <div>联动作业</div>
-    <div>信号监控</div>
-    <div>报警信息</div>
+    <div class="optionl sys_log" @click="skipHome">主页</div>
+    <div class="optionl sys_log" @click="skipLogWindow">系统日志</div>
+    <div class="optionl">
+        <div>PLC</div>
+        <div class="point"></div>
+    </div>
+    <div class="optionl">
+        <div>网络地址(192.168.31.1:200)</div>
+        <div class="point"></div>
+    </div>
     <n-icon size="30" class="menu_icon" @click="activate('right')">
         <MdMenu/>
     </n-icon>
     <n-drawer v-model:show="active" :width="502" :placement="placement">
         <n-drawer-content title="参数配置">
             <n-form ref="formRef" :model="model" :rules="rules">
+                <n-form-item path="ip" label="MES IP地址">
+                    <n-input v-model:value="model.ip" placeholder="0.0.0.0-255.255.255.255"></n-input>
+                </n-form-item>
+                <n-form-item path="port" label="MES 端口">
+                    <n-input v-model:value="model.port" placeholder="0-65535"></n-input>
+                </n-form-item>
                 <n-form-item path="WorkStation" label="MES 扫描站点">
                     <n-input v-model:value="model.WorkStation" placeholder=""></n-input>
                 </n-form-item>
@@ -36,6 +49,7 @@ import { MdMenu } from '@vicons/ionicons4'
 import { ref, computed, reactive } from 'vue'
 // import { useMessage } from 'naive-ui'
 import store from '@/store'
+import router from '@/router'
 
 // const message = useMessage()
 
@@ -84,6 +98,13 @@ const handleValidateButtonClick = function(e){
         });
 }
 
+const skipLogWindow = function(){
+    router.replace('/logWindow')
+}
+const skipHome = function(){
+    router.replace('/')
+}
+
 
 
 </script>
@@ -91,15 +112,31 @@ const handleValidateButtonClick = function(e){
 <style>
 .head{
     height: 40px;
-    background-color: rgb(247, 184, 184);
+    /* background-color: rgb(247, 184, 184); */
     display: flex;
     align-items: center;
-   
+    border-bottom: 1px solid rgb(239, 239, 245);
 }
 .menu_icon{
    cursor: pointer;
    margin-left: auto;
    margin-right: 20px;
+}
+.point{
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: red;
+    box-shadow: inset;
+    margin-left: 7px;
+}
+.optionl{
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+.sys_log{
+    cursor: pointer;
 }
 
 </style>

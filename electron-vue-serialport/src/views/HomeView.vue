@@ -1,5 +1,6 @@
 <template>
   <div>
+    ok
     <div v-for="(item,index) in serialportPaths" :key="index">
       <a href="#" @click="open(item)">{{item}}</a>
       <n-divider />

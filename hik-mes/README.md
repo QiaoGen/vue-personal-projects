@@ -1,19 +1,24 @@
 # hik-mes
 
-## Project setup
+## project 环境
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+node16.13.0
+python3 环境
+npm config python "path to python" 指定npm python版本
+node-snap7指定python2.7，但是node-gyp报错必须使用python3
 ```
 
-### Compiles and minifies for production
+## 注意事项
 ```
-npm run build
+pluginOptions: {
+    electronBuilder: {
+        nodeIntegration: true,
+        externals: [
+        'node-snap7'
+        ]
+    }
+}
+预编译node-snap7
+node-snap7必须加入"dependencies"
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
