@@ -1,14 +1,16 @@
 <template>
   <div class="head">
+    
     <div class="optionl sys_log" @click="skipHome">主页</div>
     <div class="optionl sys_log" @click="skipLogWindow">系统日志</div>
+
     <div class="optionl">
         <div>PLC</div>
-        <div class="point"></div>
+        <div :class="plcConnectionStatus? 'point_green':'point'"></div>
     </div>
     <div class="optionl">
-        <div>网络地址(192.168.31.1:200)</div>
-        <div class="point"></div>
+        <div>打印机地址(192.168.31.1:200)</div>
+        <div :class="plcConnectionStatus? 'point_green':'point'"></div>
     </div>
     <n-icon size="30" class="menu_icon" @click="activate('right')">
         <MdMenu/>
@@ -50,8 +52,9 @@ import { ref, computed, reactive } from 'vue'
 // import { useMessage } from 'naive-ui'
 import store from '@/store'
 import router from '@/router'
+import { ipcRenderer } from 'electron'
 
-// const message = useMessage()
+const plcConnectionStatus = ref(false)
 
 const formRef = ref(null)
 // const model = ref({
@@ -105,6 +108,14 @@ const skipHome = function(){
     router.replace('/')
 }
 
+getPLCInfo()
+function getPLCInfo(){
+    ipcRenderer.send('getPLCInfo-msg')
+}
+ipcRenderer.once('getPLCInfo-replay',function(event, arg){
+    plcConnectionStatus.value = arg.plcConnetStatus
+})
+
 
 
 </script>
@@ -126,9 +137,17 @@ const skipHome = function(){
     width: 8px;
     height: 8px;
     border-radius: 4px;
-    background-color: red;
+    background-color: rgb(212, 40, 40);
     box-shadow: inset;
     margin-left: 7px;
+}
+.point_green{
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    box-shadow: inset;
+    margin-left: 7px;
+    background-color: aquamarine;
 }
 .optionl{
     display: flex;

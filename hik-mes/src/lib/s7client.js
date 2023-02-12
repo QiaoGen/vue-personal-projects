@@ -1,71 +1,41 @@
+import log from '@/utils/log.js'
 var snap7 = require('node-snap7');
-
 var s7client = new snap7.S7Client();
-console.log("test=========================")
-s7client.ConnectTo('192.168.2.1', 0, 1, function(err) {
-    if(err)
-        return console.log(' >> Connection failed. Code #' + err + ' - ' + s7client.ErrorText(err));
 
-    // Read the first byte from PLC process outputs...
+var plcConnetStatus = false //plc连接状态
 
-    
-    // s7client.ABWrite(0,1, Buffer.from([1]), function(err, res){
-    //     if(err)
-    //         return console.log(' >> ABWrite failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-    //     // ... and write it to stdout
-    //     console.log('ABWrite:',res)
-    // })
-
-    // s7client.ABRead(0, 10, function(err, res) {
-    //     if(err)
-    //         return console.log(' >> ABRead failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-    //     // ... and write it to stdout
-    //     console.log('ABRead',res)
-    // });
-
-    s7client.MBWrite(4,5, Buffer.from([255]), function(err, res){
-        if(err)
-            return console.log(' >> MBWrite failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-        // ... and write it to stdout
-        console.log('MBWrite:',res)
+const ConnectTo = function(ip){
+    return new Promise((reslove,reject) => {
+        s7client.ConnectTo(ip, 0, 1, function(err) {
+            if(err){
+                log.error(' >> PLC connection failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+                plcConnetStatus = false
+                reject(false)
+            }
+            else{
+                log.info(' >> PLC connect successfully')
+                plcConnetStatus = true
+                reslove(true)
+            }
+        })
     })
+}
 
-
-    s7client.MBRead(0, 10, function(err,res){
-        if(err)
-            return console.log(' >> MBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-        // ... and write it to stdout
-        console.log('MBRead:',res)
-        if(res.length > 0){
-            res.forEach(e => {
-                // console.log(e.toString(2))
-                console.log(fullBinary(e.toString(2)))
-            })
-        }
+const MBRead = function(){
+    return new Promise((reslove,reject) => {
+        s7client.MBRead(0, 10, function(err,res){
+            if(err)
+                reject(' >> MBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+            // if(res.length > 0){
+            //     res.forEach(e => {
+            //         // console.log(e.toString(2))
+            //         console.log(fullBinary(e.toString(2)))
+            //     })
+            // }
+            reslove(res)
+        })
     })
-
-    // s7client.EBWrite(0,1, Buffer.from([1]), function(err, res){
-    //     if(err)
-    //         return console.log(' >> EBWrite failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-    //     // ... and write it to stdout
-    //     console.log('EBWrite:',res)
-    // })
-
-
-    // s7client.EBRead(0, 10, function(err,res){
-    //     if(err)
-    //         return console.log(' >> EBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err));
-
-    //     // ... and write it to stdout
-    //     console.log('EBRead:',res)
-    // })
-    
-});
+}
 
 
 // 补全二进制 参数string
@@ -77,5 +47,9 @@ const fullBinary = function(param){
     return fullNum+param
 }
 
-module.exports
+export default{
+    plcConnetStatus,
+    ConnectTo,
+    MBRead
+}
 

@@ -1,12 +1,37 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+import log from '@/utils/log.js'
+import s7client from'@/lib/s7Client'
+
+
+// log.initialize({ preload: true });
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const s7client = require('./lib/s7Client')
-// s7client.ABRead()
+s7client.ConnectTo('192.168.2.1').then(res => {
+  PLCInfo.plcConnetStatus = res
+}).catch(err => {
+  PLCInfo.plcConnetStatus = err
+})
+s7client.MBRead().then(res => {
+  log.info(res)
+}).catch(err => {
+  log.error(err)
+})
+
+// 传递render页面 plc数据
+var PLCInfo = {
+  plcConnetStatus: s7client.plcConnetStatus,
+}
+ipcMain.on('getPLCInfo-msg',function(event, ...arg){
+  event.sender.send('getPLCInfo-replay', PLCInfo)
+})
+
+
+// log.info("userData: "+app.getPath('userData'))
+
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([

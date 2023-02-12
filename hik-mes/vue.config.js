@@ -8,6 +8,7 @@ configureWebpack: (config) => {
 }
 
 module.exports = defineConfig({
+  publicPath: './', //静态资源相对引入路径
   transpileDependencies: true,
   configureWebpack: {
     resolve: { fallback: { fs: false ,path: false} },

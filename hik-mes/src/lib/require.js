@@ -139,14 +139,14 @@ var get = function get(url, params) {
  * @param {String} url [请求的url地址] 
  * @param {Object} params [请求时携带的参数] 
  */
-var post = function post(url, params, headers) {
+var post = function post(params, headers) {
     return new Promise((resolve, reject) => {
         // Object.assign()
         if(headers != null){
             console.log('headers',Object.assign(headers, { 'Content-Type': 'application/json' }))
         }
         
-        axios.post(urlPrefix + getUrl(url), params, { headers: { 'Content-Type': 'application/json' } })
+        axios.post(urlPrefix , params, { headers: { 'Content-Type': 'application/json' } })
             .then(res => {
                 resolve(res.data);
             })

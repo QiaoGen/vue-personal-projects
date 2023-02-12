@@ -20,5 +20,7 @@ pluginOptions: {
 }
 预编译node-snap7
 node-snap7必须加入"dependencies"
+
+electron-log < V4.4.8
 ```
 
