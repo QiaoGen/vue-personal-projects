@@ -3,8 +3,11 @@
     <n-message-provider>
       <MessageApi />
     </n-message-provider>
-    <div>
-      <router-view/>
+    <div style="height: 100%;">
+      <!-- <keep-alive include="operation"> -->
+      <keep-alive>
+        <router-view/>
+      </keep-alive>
     </div>
   </n-dialog-provider>
   
@@ -13,6 +16,7 @@
 <script setup>
 import MessageApi from '@/components/uitls/MessageApi.vue';
 import { NMessageProvider } from "naive-ui";
+
 
 </script>
 
@@ -27,6 +31,13 @@ import { NMessageProvider } from "naive-ui";
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  height: 100%;
+}
+html,
+body {
+	padding: 0;
+	margin: 0;
+	height: 100%;
 }
 
 nav {

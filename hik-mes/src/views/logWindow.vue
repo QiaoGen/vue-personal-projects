@@ -1,13 +1,70 @@
 <template>
-  <div>
-    系统日志
+  <div class="log_f">
+    <div class="log_list">
+      <div class="list_title">日志列表</div>
+      <div class="log_item" style="cursor: pointer;" @click="selectFile(item)" v-for="(item,index) in fileList">{{item}}</div>
+    </div>
+    <!-- <div>{{content}}</div> -->
+    <textarea style="width: 100%;border: none;padding: 10px;resize:none;border: none;" readonly>{{content}}</textarea>
   </div>
 </template>
 
 <script setup>
+import { ipcRenderer } from 'electron'
+import {onBeforeUnmount, ref} from 'vue'
+
+const fileList = ref([])
+const content = ref(null)
+
+const getFileList = function(){
+  ipcRenderer.send('logFile-msg','getLogFileList')
+}
+
+ipcRenderer.on('getLogFileList-reply',function(event,arg){
+  fileList.value = arg
+})
+
+//读取文件内容
+const readFile = function(fileName){
+  ipcRenderer.send('logFile-msg','readFile',fileName)
+}
+ipcRenderer.on('readFile-reply',function(event,arg){
+  console.log(arg)
+  content.value = arg
+})
+
+const selectFile = function(fileName){
+  readFile(fileName)
+}
+
+getFileList()
+readFile('2023-2-18.log')
+
+// 移除监听器
+onBeforeUnmount(() => {
+  ipcRenderer.removeAllListeners(['getLogFileList-reply','readFile-reply'])
+  console.log('onMounted')
+})
 
 </script>
 
-<style>
-
+<style scoped>
+.log_f{
+  display: flex;
+}
+.log_list{
+  padding: 10px;
+  width: 150px;
+  border-right: 1px solid rgb(239, 239, 245);
+}
+.list_title{
+  font-weight: bold;
+  border-bottom: 1px solid rgb(239, 239, 245);
+}
+.log_item{
+  cursor: pointer;
+}
+.log_item:hover{
+  background-color: rgba(230, 230, 230, 0.713);
+}
 </style>

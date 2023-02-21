@@ -4,6 +4,10 @@ var s7client = new snap7.S7Client();
 
 var plcConnetStatus = false //plc连接状态
 
+const getPlcConnetStatus = function(){
+    
+}
+
 const ConnectTo = function(ip){
     return new Promise((reslove,reject) => {
         s7client.ConnectTo(ip, 0, 1, function(err) {
@@ -49,6 +53,7 @@ const fullBinary = function(param){
 
 export default{
     plcConnetStatus,
+    getPlcConnetStatus,
     ConnectTo,
     MBRead
 }

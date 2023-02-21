@@ -39,7 +39,7 @@ var client
 // 连接打印机服务
 const connectPrintServer = function(){
     client = net.Socket()
-    client.connect(9998, '192.168.1.1',function(){
+    client.connect(8000, '127.0.0.1',function(){
         
     })
 }

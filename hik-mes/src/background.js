@@ -4,33 +4,147 @@ import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import log from '@/utils/log.js'
+import logReader from '@/utils/logReader'
 import s7client from'@/lib/s7Client'
+import tcpp from 'tcp-ping'
+
+import mysql from '@/lib/mysql'
+
+mysql.connect()
+
+
 
 
 // log.initialize({ preload: true });
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-s7client.ConnectTo('192.168.2.1').then(res => {
-  PLCInfo.plcConnetStatus = res
-}).catch(err => {
-  PLCInfo.plcConnetStatus = err
-})
-s7client.MBRead().then(res => {
-  log.info(res)
-}).catch(err => {
-  log.error(err)
-})
+const connectPLC = function(){
+  s7client.ConnectTo('192.168.2.1').then(res => {
+    PLCInfo.plcConnetStatus = res
+  }).catch(err => {
+    PLCInfo.plcConnetStatus = err
+  })
+  s7client.MBRead().then(res => {
+    log.info(res)
+  }).catch(err => {
+    log.error(err)
+  })
+}
+connectPLC()
 
 // 传递render页面 plc数据
 var PLCInfo = {
   plcConnetStatus: s7client.plcConnetStatus,
 }
-ipcMain.on('getPLCInfo-msg',function(event, ...arg){
-  event.sender.send('getPLCInfo-replay', PLCInfo)
+ipcMain.on('plc-msg',function(event, ...arg){
+  log.info('plc-msg:'+arg)
+  switch(arg[0]){
+    case 'getPLCInfo':
+      event.sender.send('getPLCInfo-replay', PLCInfo)
+    break; 
+    case 'reconnectPLC':
+      // s7client.ConnectTo('192.168.2.1')
+      connectPLC()
+      event.sender.send('getPLCInfo-replay', PLCInfo)
+      // s7client.ConnectTo('192.168.2.1').then(res => {
+      //   log.info('res:'+res)
+      //   PLCInfo.plcConnetStatus = res
+      //   event.sender.send('getPLCInfo-replay', PLCInfo)
+      // }).catch(err => {
+      //   log.info('err:'+err)
+      //   PLCInfo.plcConnetStatus = err
+      //   event.sender.send('getPLCInfo-replay', PLCInfo)
+      // })
+    break;
+  }
 })
 
+//获取数据库数据
+ipcMain.on('mysql-msg',function(event, ...arg){
+    log.info('mysql-msg:'+arg)
+    switch(arg[0]){
+      case 'querySysConfig':
+        mysql.querySysConfig().then(res => {
+          event.sender.send('querySysConfig-replay', res)
+        }).catch(err => {
+          log.error(err)
+        })
+      break;
+      case 'updateSysConfig':
+        mysql.updateSysConfig(arg[1]).then(res => {
+          event.sender.send('updateSysConfig-replay', res)
+        }).catch(err => {
+          log.error(err)
+        })
+      break;
+      case 'queryBarcdList':
+        mysql.queryBarcdList().then(res => {
+          event.sender.send('queryBarcdList-replay', res)
+        }).catch(err => {
+          log.error(err)
+        })
+      break;
+      case 'queryReadyBarcdList':
+        mysql.queryReadyBarcdList().then(res => {
+          event.sender.send('queryReadyBarcdList-replay', res)
+        }).catch(err => {
+          log.error(err)
+        })
+      break;
+    }
+})
 
-// log.info("userData: "+app.getPath('userData'))
+//日志数据
+ipcMain.on('logFile-msg', function(event,...arg){
+  log.info('logFile-msg:'+arg)
+  switch(arg[0]){
+    case 'getLogFileList':
+      logReader.getLogFileList(app.getPath('userData')+'/electron_log/app/').then(res => {
+        event.sender.send('getLogFileList-reply', res)
+      }).catch(err => {
+        event.sender.send('getLogFileList-reply', err)
+      })
+    break;
+    case 'readFile':
+      logReader.readFile(app.getPath('userData')+'/electron_log/app/'+arg[1]).then(res => {
+        event.sender.send('readFile-reply', res)
+      }).catch(err => {
+        event.sender.send('readFile-reply', err)
+      })
+    break;
+  }
+})
+
+// 渲染进程获取ip 端口状态
+ipcMain.on('checkIPPort-msg',function(event,arg){
+  checkTCPCOnnect().then(res => {
+    event.sender.send('getIPPort-reply',{tcp: res} )
+  })
+  checkPLCCOnnect().then(res => {
+    event.sender.send('getIPPort-reply',{plc: res} )
+  })
+})
+
+log.info("userData: "+app.getPath('userData'))
+
+// 获取系统数据检测地址是否能ping通
+const checkTCPCOnnect = function(){
+  return new Promise((resolve) => {
+    mysql.querySysConfig().then(res => {
+      let sysConfig = JSON.parse(res)[0]
+      tcpp.probe(sysConfig.PrintIP, sysConfig.PrintPort, function(err, available) {
+          resolve(available)
+      });
+    })
+  })
+}
+const checkPLCCOnnect = function(){
+  return new Promise((resolve) => {
+    tcpp.ping({ address: '192.168.2.1',timeout:2000 ,attempts:1}, function(err, data) {
+      resolve(data.results[0].err.toString().indexOf('timeout') == -1)
+    })
+  })
+}
 
 
 // Scheme must be registered before the app is ready

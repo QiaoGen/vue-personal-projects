@@ -15,8 +15,13 @@ const routes = [
       {
         path: '/operation',
         name: 'operation',
-        component: () => import('@/views/operation.vue')
-       }
+        component: () => import('@/views/operation.vue'),
+      },
+      {
+        path: '/warning',
+        name: 'warning',
+        component: () => import('@/views/warning.vue')
+      }
     ]
   }
   
