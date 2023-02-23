@@ -81,7 +81,6 @@ import { MdMenu } from '@vicons/ionicons4'
 import { Home24Regular,BookmarkSearch24Regular,BookmarkMultiple24Regular } from '@vicons/fluent'
 import { ref, reactive, onBeforeUnmount } from 'vue'
 // import { useMessage } from 'naive-ui'
-import store from '@/store'
 import router from '@/router'
 import { ipcRenderer } from 'electron'
 
@@ -172,7 +171,7 @@ const handleValidateButtonClick = function(e){
         });
 }
 
-ipcRenderer.once('updateSysConfig-replay',function(event, arg){
+ipcRenderer.once('updateSysConfig-reply',function(event, arg){
     console.log(arg)
 })
 
@@ -191,8 +190,8 @@ getPLCInfo()
 function getPLCInfo(){
     ipcRenderer.send('plc-msg','getPLCInfo')
 }
-ipcRenderer.on('getPLCInfo-replay',function(event, arg){
-    console.log('getPLCInfo-replay:', arg)
+ipcRenderer.on('getPLCInfo-reply',function(event, arg){
+    console.log('getPLCInfo-reply:', arg)
     plcConnectionStatus.value = arg.plcConnetStatus
     if(!plcConnectionStatus.value){
         window.$message.error("PLC连接失败！请检查PLC是否正确接入。",{
@@ -206,7 +205,7 @@ ipcRenderer.on('getPLCInfo-replay',function(event, arg){
 const getSysInfo = function(){
     ipcRenderer.send('mysql-msg','querySysConfig')
 }
-ipcRenderer.once('querySysConfig-replay',function(event, arg){
+ipcRenderer.once('querySysConfig-reply',function(event, arg){
     let sysConfig = JSON.parse(arg)[0]
     console.log(sysConfig)
     model.value = {
@@ -240,7 +239,7 @@ ipcRenderer.on('getIPPort-reply', function(event, arg){
 
 
 onBeforeUnmount(() => {
-  ipcRenderer.removeAllListeners('getIPPort-reply','getPLCInfo-replay')
+  ipcRenderer.removeAllListeners('getIPPort-reply','getPLCInfo-reply')
   clearInterval(getIPPortStatus)
 })
 

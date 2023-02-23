@@ -10,13 +10,7 @@
 import headGuider from '@/components/home/headGuider.vue'
 import { ref ,onBeforeUnmount} from 'vue'
 import { ipcRenderer } from 'electron'; 
-
-
-
-onBeforeUnmount(()=>{
-    ipcRenderer.removeAllListeners('getIPPort-reply')
-})
-const msgNum = ref(3)
+const msgNum = ref(0)
 
 // 设备告警信息/PLC数据
 const readPLC = function(){
@@ -54,6 +48,16 @@ const warnCategory = {
 // })
 // getIPPortStatus()
 
+// 告警信息格式定义
+// {
+//   value,关键值 任何数据类型
+//   msg,封装的信息
+//   type 告警信息类型 info warning error
+// }
+ipcRenderer.on('sysInfo-reply',function(event, arg){
+  console.log('sysInfo:',arg)
+})
+
 const heartbeat = setInterval(() => {
   console.log('heartbeat')
   // getIPPortStatus()
@@ -62,12 +66,9 @@ const heartbeat = setInterval(() => {
 
 // 移除监听器
 onBeforeUnmount(() => {
-  ipcRenderer.removeAllListener('getIPPort-reply')
+  ipcRenderer.removeAllListener('sysInfo-reply')
   clearInterval(heartbeat)
 })
-
-
-
 </script>
 
 <style scoped>

@@ -85,6 +85,25 @@ const queryPkgNumberList = function(){
     })
 }
 
+const updateBarcdValidStatus = function(param){
+    let questionSign = '?'
+    for(let i= 1; i < param.length; i++){
+        questionSign += ',?'
+    }
+    return new Promise((resolve,reject) => {
+        pool.execute(
+            'update `barcd_list` set `ValidStatus` = 1 where `Barcd` in ('+ questionSign +')',
+            param,
+            function(err, results, fields) {
+                if(err){
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
 const updatePkgNumberList = function(param){
     return new Promise((resolve, reject) => {
         pool.execute(
@@ -120,9 +139,10 @@ const updateSysConfig = function(param1){
 export default{
     connect,
     querySysConfig,
-    updateSysConfig,
     queryBarcdList,
     queryPkgNumberList,
     queryReadyBarcdList,
-    updatePkgNumberList
+    updateSysConfig,
+    updatePkgNumberList,
+    updateBarcdValidStatus
 }

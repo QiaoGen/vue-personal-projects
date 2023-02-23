@@ -40,21 +40,12 @@ ipcMain.on('plc-msg',function(event, ...arg){
   log.info('plc-msg:'+arg)
   switch(arg[0]){
     case 'getPLCInfo':
-      event.sender.send('getPLCInfo-replay', PLCInfo)
+      event.sender.send('getPLCInfo-reply', PLCInfo)
     break; 
     case 'reconnectPLC':
       // s7client.ConnectTo('192.168.2.1')
       connectPLC()
-      event.sender.send('getPLCInfo-replay', PLCInfo)
-      // s7client.ConnectTo('192.168.2.1').then(res => {
-      //   log.info('res:'+res)
-      //   PLCInfo.plcConnetStatus = res
-      //   event.sender.send('getPLCInfo-replay', PLCInfo)
-      // }).catch(err => {
-      //   log.info('err:'+err)
-      //   PLCInfo.plcConnetStatus = err
-      //   event.sender.send('getPLCInfo-replay', PLCInfo)
-      // })
+      event.sender.send('getPLCInfo-reply', PLCInfo)
     break;
   }
 })
@@ -65,30 +56,39 @@ ipcMain.on('mysql-msg',function(event, ...arg){
     switch(arg[0]){
       case 'querySysConfig':
         mysql.querySysConfig().then(res => {
-          event.sender.send('querySysConfig-replay', res)
+          event.sender.send('querySysConfig-reply', res)
         }).catch(err => {
           log.error(err)
         })
       break;
       case 'updateSysConfig':
         mysql.updateSysConfig(arg[1]).then(res => {
-          event.sender.send('updateSysConfig-replay', res)
+          event.sender.send('updateSysConfig-reply', res)
         }).catch(err => {
           log.error(err)
         })
       break;
       case 'queryBarcdList':
         mysql.queryBarcdList().then(res => {
-          event.sender.send('queryBarcdList-replay', res)
+          event.sender.send('queryBarcdList-reply', res)
         }).catch(err => {
           log.error(err)
         })
       break;
       case 'queryReadyBarcdList':
         mysql.queryReadyBarcdList().then(res => {
-          event.sender.send('queryReadyBarcdList-replay', res)
+          event.sender.send('queryReadyBarcdList-reply', res)
         }).catch(err => {
           log.error(err)
+        })
+      break;
+      case 'updateBarcdValidStatus':
+        //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
+        mysql.updateBarcdValidStatus(JSON.parse(arg[1])).then(res => {
+          // event.sender.send('updateBarcdValidStatus-reply', res)
+        }).catch(err => {
+          event.sender.send('updateBarcdValidStatus-reply','数据库异常')
+          log.error('数据库异常'+err)
         })
       break;
     }
@@ -113,6 +113,11 @@ ipcMain.on('logFile-msg', function(event,...arg){
       })
     break;
   }
+})
+
+// 系统告警数据
+ipcMain.on('sysInfo-msg', function(event, ...arg){
+
 })
 
 // 渲染进程获取ip 端口状态

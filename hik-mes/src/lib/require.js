@@ -151,6 +151,7 @@ var post = function post(params, headers) {
                 resolve(res.data);
             })
             .catch(err => {
+                console.error('error:',err)
                 reject(err.data)
             })
     });

@@ -5,19 +5,26 @@ const SCAN_BARCD_SUBMIT = 'SCAN_BARCD_SUBMIT' //获取集成码
 const SCAN_BARCD_CHECK = 'SCAN_BARCD_CHECK' //序列号验证
 //序列号验证
 const validBarcd = function(Barcd){
-    require.post({
-        Id: "1234568",
-        ServerName: "SCAN_BARCD_CHECK",
-        WorkStation: "T30085",
-        MachineId: "hzdz-123456",
-        Data: {
-            Barcd,
-            Aufnr:"YES"
-        }
-    }).then(res => {
-        
-    }).catch(err => {
-        
+    return new Promise((resolve,reject) => {
+        // require.post({
+        //     Id: "1234568",
+        //     ServerName: "SCAN_BARCD_CHECK",
+        //     WorkStation: "T30085",
+        //     MachineId: "hzdz-123456",
+        //     Data: {
+        //         Barcd,
+        //         Aufnr:"YES"
+        //     }
+        // }).then(res => {
+        //     resolve(res)
+        // }).catch(err => {
+        //     let error = {
+        //         value: Barcd,
+        //         msg: err
+        //     }
+        //     reject(error)
+        // })
+        resolve('ok')
     })
 }
 
@@ -45,6 +52,11 @@ const connectPrintServer = function(){
 }
 
 /* 监听end事件 */ 
-client.on("end", function () {
-    console.log("data end");
-})
+// client.on("end", function () {
+//     console.log("data end");
+// })
+
+export default{
+    validBarcd,
+    getPkgNumber
+}
