@@ -79,12 +79,13 @@
 <script setup>
 import { MdMenu } from '@vicons/ionicons4'
 import { Home24Regular,BookmarkSearch24Regular,BookmarkMultiple24Regular } from '@vicons/fluent'
-import { ref, reactive, onBeforeUnmount } from 'vue'
-// import { useMessage } from 'naive-ui'
+import { ref, reactive, onBeforeUnmount,defineProps,getCurrentInstance } from 'vue'
 import router from '@/router'
+import store from '@/store'
 import { ipcRenderer } from 'electron'
 
-import { defineProps } from 'vue'
+const {proxy : cthis} = getCurrentInstance()
+
 const params = defineProps({
     msgNum:{
         type: Number,
@@ -164,6 +165,7 @@ const handleValidateButtonClick = function(e){
           if (!errors) {
             window.$message.success("配置成功");
             ipcRenderer.send('mysql-msg','updateSysConfig',JSON.stringify(model.value))
+            cthis.$store.commit('updateSysConfig',model.value)
           } else {
             console.log(errors);
             window.$message.error("配置失败");
@@ -214,6 +216,7 @@ ipcRenderer.once('querySysConfig-reply',function(event, arg){
         ip: sysConfig.PrintIP,
         port: sysConfig.PrintPort
     }
+    store.commit('updateSysConfig',model.value)
 })
 getSysInfo()
 

@@ -20,6 +20,7 @@ const connect = function(){
         user: 'root',
         password: 'root',
         database: 'hik',
+        multipleStatements: true
     })
 }
 
@@ -104,6 +105,45 @@ const updateBarcdValidStatus = function(param){
     })
 }
 
+//删除工单
+const updateBarcdDeleteStatus = function(param){
+    let questionSign = '?'
+    for(let i= 1; i < param.length; i++){
+        questionSign += ',?'
+    }
+    return new Promise((resolve,reject) => {
+        pool.execute(
+            'update `barcd_list` set `Deleted` = 1 where `Barcd` in ('+ questionSign +')',
+            param,
+            function(err, results, fields) {
+                if(err){
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+//删除集成码
+const updatePkgNumberDeleteStatus = function(param){
+    let questionSign = '?'
+    for(let i= 1; i < param.length; i++){
+        questionSign += ',?'
+    }
+    return new Promise((resolve,reject) => {
+        pool.execute(
+            'update `pkg_number_list` set `Deleted` = 1 where `PkgNumber` in ('+ questionSign +')',
+            param,
+            function(err, results, fields) {
+                if(err){
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
 const updatePkgNumberList = function(param){
     return new Promise((resolve, reject) => {
         pool.execute(
@@ -136,6 +176,18 @@ const updateSysConfig = function(param1){
     })
 }
 
+const generatePkgNumber = function(param){
+    let questionSign = '?'
+    for(let i= 1; i < param.length-1; i++){
+        questionSign += ',?'
+    }
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'update `barcd _list` set `PkgNumber` = ? '
+        )
+    })
+}
+
 export default{
     connect,
     querySysConfig,
@@ -144,5 +196,8 @@ export default{
     queryReadyBarcdList,
     updateSysConfig,
     updatePkgNumberList,
-    updateBarcdValidStatus
+    updateBarcdValidStatus,
+    updateBarcdDeleteStatus,
+    updatePkgNumberDeleteStatus
+    
 }

@@ -3,14 +3,18 @@ import persistedState from 'vuex-persistedstate'
 
 const store = createStore({
     state:{
-        WorkStation: '123',
-        MachineId: '22'
+        sysConfig:{
+            WorkStation: '1',
+            MachineId: '2'
+        }
     },
     getters:{
         
     },
     mutations:{
-        
+        updateSysConfig(state, sysConfig){
+            state.sysConfig = sysConfig
+        }
     },
     actions:{
 

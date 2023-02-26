@@ -52,6 +52,10 @@ ipcMain.on('plc-msg',function(event, ...arg){
 
 //获取数据库数据
 ipcMain.on('mysql-msg',function(event, ...arg){
+    let result = {
+      success: true,
+      msg: null
+    }
     log.info('mysql-msg:'+arg)
     switch(arg[0]){
       case 'querySysConfig':
@@ -82,12 +86,43 @@ ipcMain.on('mysql-msg',function(event, ...arg){
           log.error(err)
         })
       break;
+      case 'queryPkgNumberList':
+        mysql.queryPkgNumberList().then(res => {
+          event.sender.send('queryPkgNumberList-reply', res)
+        }).catch(err => {
+          log.error(err)
+        })
+      break;
       case 'updateBarcdValidStatus':
         //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
         mysql.updateBarcdValidStatus(JSON.parse(arg[1])).then(res => {
           // event.sender.send('updateBarcdValidStatus-reply', res)
         }).catch(err => {
           event.sender.send('updateBarcdValidStatus-reply','数据库异常')
+          log.error('数据库异常'+err)
+        })
+      break;
+      case 'deleteBarcd':
+        //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
+        mysql.updateBarcdDeleteStatus(JSON.parse(arg[1])).then(res => {
+          result.msg = '删除成功'
+          event.sender.send('deleteBarcd-reply', result)
+        }).catch(err => {
+          result.msg = '删除工单失败'
+          result.success = false
+          event.sender.send('deleteBarcd-reply',result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case 'deletePkgNumber':
+        //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
+        mysql.updatePkgNumberDeleteStatus(JSON.parse(arg[1])).then(res => {
+          result.msg = '删除成功'
+          event.sender.send('deletePkgNumber-reply', result)
+        }).catch(err => {
+          result.msg = '删除集成码失败'
+          result.success = false
+          event.sender.send('deletePkgNumber-reply', result)
           log.error('数据库异常'+err)
         })
       break;
