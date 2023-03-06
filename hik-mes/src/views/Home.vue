@@ -1,16 +1,25 @@
 <template>
   <div class="home">
-    <!-- <head-guider class="fix_head" :msgNum="msgNum"/>
-    <router-view style="flex: auto;"/> -->
-      <menu-bar></menu-bar>
-      <!-- <div class="operation">
-        <div class="o_content">
-
-        </div>
-        <div class="button_bar">
-          我是底部
-        </div>
-      </div> -->
+    <div class="menu">
+      <menu-bar/>
+    </div>
+    <div class="right">
+      <div class="centent">
+        <n-layout style="height: 100%;">
+          <router-view v-slot="{ Component }" >
+          <keep-alive include="MainWindow">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
+        </n-layout>
+      </div>
+      <div style="height: 30px;width: 100%;"></div>
+      <div class="bottom_bar">
+        <n-layout style="height: 100%;">
+          <status-bar/>
+        </n-layout>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -19,6 +28,7 @@
 import { ref ,onBeforeUnmount} from 'vue'
 import { ipcRenderer } from 'electron'; 
 import MenuBar from '@/views/MenuBar.vue';
+import StatusBar from '@/views/StatusBar.vue'
 const msgNum = ref(0)
 
 // 设备告警信息/PLC数据
@@ -83,26 +93,37 @@ onBeforeUnmount(() => {
 <style scoped>
 .fix_head{
   width: 100%;
-  /* height: 300px; */
-  /* position: fixed;
-  top: 0; */
 }
 .home{
   height: 100%;
   width: 100%;
-  /* background-color: lightpink; */
   display: flex;
-  flex-direction: column;;
+  flex-direction: row;;
 }
-.operation{
+.menu{
+  height: 100%;
+  z-index: 10;
+  background-color: aliceblue;
+}
+.right{
+  height: 100%;
+  flex: 1;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  position: relative;
 }
-.o_content{
-  background-color: lightgray;
+.centent{
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 }
-.button_bar{
-  height: 100px;
-  margin-bottom: auto;
+.bottom_bar{
+  width: 100%;
+  height: 30px;
+  position: absolute;
+  bottom: 0;
+  background-color: rgb(233,233,233);
+  overflow: hidden;
+  border-top: 1px solid rgb(223, 223, 223);
 }
 </style>

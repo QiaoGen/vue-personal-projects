@@ -5,7 +5,7 @@
       <div class="log_item" style="cursor: pointer;" @click="selectFile(item)" v-for="(item,index) in fileList">{{item}}</div>
     </div>
     <!-- <div>{{content}}</div> -->
-    <textarea style="width: 100%;border: none;padding: 10px;resize:none;border: none;" readonly>{{content}}</textarea>
+    <textarea style="width: 100%;height:100%;border: none;padding: 10px;resize:none;border: none;resize: none;width: 100%;overflow: auto;word-break: break-all;" readonly>{{content}}</textarea>
   </div>
 </template>
 
@@ -51,8 +51,9 @@ onBeforeUnmount(() => {
 <style scoped>
 .log_f{
   width: 100%;
-  height: 800px;
+  height: 100%;
   display: flex;
+  overflow: hidden;
 }
 .log_list{
   padding: 10px;

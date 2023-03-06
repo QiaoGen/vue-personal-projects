@@ -88,7 +88,7 @@ onBeforeUnmount(() => {
     flex-wrap: nowrap;
     align-items: center;
     overflow: hidden;
-    height: 30px;
+    /* border-top: 1px solid rgb(223, 223, 223); */
 }
 .time{
     font-size: 12px;

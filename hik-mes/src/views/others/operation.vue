@@ -248,8 +248,6 @@ onBeforeUnmount(() => {
   flex-direction: row;
   height: 100%;
   justify-content: flex-start;
-  /* align-items: center; */
-  /* flex-direction: column; */
 }
 .barch_item{
   cursor: pointer;
@@ -262,19 +260,13 @@ onBeforeUnmount(() => {
 }
 .barch_item:hover{
   background-color: rgba(46, 54, 56, 0.09);
-  /* height: 80px;
-  line-height: 80px;
-  font-size: 18px; */
 }
 .barch_f{
   width: 400px;
   max-height: 600px;
   overflow: scroll;
   overflow-x: hidden;
-  /* border: 1px solid lightgray; */
   flex: auto;
-  /* padding-right: 13px; */
-  /* background-color: lightgreen; */
 }
 .item_t{
   display: flex;
@@ -299,11 +291,9 @@ onBeforeUnmount(() => {
   width: 400px;
   flex-direction: column;
   overflow: hidden;
-  /* box-shadow: lightgray 0px 5px 5px 5px ;  */
   border-radius: 5px;
   margin-right:40px;
   border-radius: 0.5em;
-  /* background: #e8e8e8; */
   border: 1px solid #e8e8e8;
   transition: all .3s;
   box-shadow: 6px 6px 12px #c5c5c5,

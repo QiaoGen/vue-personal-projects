@@ -13,7 +13,7 @@
                     <div :class="barchStatus ? 'point_green' : 'point'"></div>
                 </div>
             </div>
-            <message-window :msg="barcdMsg"></message-window>
+            <message-window class="msg_window" :msg="barcdMsg"></message-window>
         </div>
         <div class="card" style="width: 60%;">
             <div class="title">集成码打印</div>
@@ -61,7 +61,7 @@
                     </n-checkbox-group>
                 </div>
             </div>
-            <message-window :msg="pkgNumberMsg"></message-window>
+            <message-window class="msg_window" :msg="pkgNumberMsg"></message-window>
         </div>
     </div>
 </template>
@@ -120,14 +120,12 @@ onBeforeUnmount(() => {
 }
 
 .card {
-    height: 100%;
     width: 40%;
-    border: 2px solid rgb(204, 204, 204);
     padding: 5px;
     text-align: left;
-    height: 100%;
-    /* display: flex; */
-    /* background-color: rgb(212, 219, 223); */
+    /* height: 100%; */
+    display: flex;
+    flex-direction: column;
 }
 
 .title {
@@ -169,12 +167,9 @@ onBeforeUnmount(() => {
     box-shadow: #18a0577d 0px 0px 8px 4px;
     margin-left: 10px;
     background-color: #18a058;
-    /* animation: breathe 3s linear infinite; */
-    /* background: linear-gradient(145deg, #e6e6e6, #ffffff); */
 }
 
 .barch_f {
-    /* border: 1px solid red; */
     width: 50%;
     margin-bottom: 20px;
 }
@@ -199,14 +194,14 @@ onBeforeUnmount(() => {
 }
 .barch_item:hover{
   background-color: rgba(46, 54, 56, 0.09);
-  /* height: 80px;
-  line-height: 80px;
-  font-size: 18px; */
 }
 .item_t{
-    /* display: ; */
     width: 100%;
     display: flex;
-    
+    text-indent: 10px;
+}
+.msg_window{
+    margin: 10px;
+    flex: 1;
 }
 </style>

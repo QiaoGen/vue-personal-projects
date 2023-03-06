@@ -2,47 +2,40 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/',
-    redirect: '/mainWindow',
-    component: ()=> import('@/views/Home.vue'),
-    children: [
-      {
-        path: '/MainWindow',
-        name: 'MainWindow',
-        component: () => import('@/views/MainWindow.vue')
-      },
-      {
-       path: '/Help',
-       name: 'Help',
-       component: () => import('@/views/Help.vue')
-      },
-      {
-        path: '/SysManager',
-        name: 'SysManager',
-        component: () => import('@/views/SysManager.vue'),
-        meta: {
-          keepAlive: true //设置页面是否需要使用缓存
-        },
-      },
-      {
-        path: '/DataReport',
-        name: 'DataReport',
-        component: () => import('@/views/DataReport.vue'),
-        meta: {
-          keepAlive: true //设置页面是否需要使用缓存
-        },
-      },
-      {
-        path: '/UserManage',
-        name: 'UserManage',
-        component: () => import('@/views/UserManage.vue')
-      },
-      {
-        path: '/log',
-        name: 'log',
-        component: () => import('@/views/others/logWindow.vue')
-      },
-    ]
+    path: '/MainWindow',
+    name: 'MainWindow',
+    component: () => import('@/views/MainWindow.vue')
+  },
+  {
+   path: '/Help',
+   name: 'Help',
+   component: () => import('@/views/Help.vue')
+  },
+  {
+    path: '/SysManager',
+    name: 'SysManager',
+    component: () => import('@/views/SysManager.vue'),
+    meta: {
+      keepAlive: true //设置页面是否需要使用缓存
+    },
+  },
+  {
+    path: '/DataReport',
+    name: 'DataReport',
+    component: () => import('@/views/DataReport.vue'),
+    meta: {
+      keepAlive: true //设置页面是否需要使用缓存
+    },
+  },
+  {
+    path: '/UserManage',
+    name: 'UserManage',
+    component: () => import('@/views/UserManage.vue')
+  },
+  {
+    path: '/log',
+    name: 'log',
+    component: () => import('@/views/others/logWindow.vue')
   },
   {
     path: '/login',

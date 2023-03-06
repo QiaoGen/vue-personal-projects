@@ -46,7 +46,7 @@ const handleValidateButtonClick = function(e){
             window.$message.success("登陆成功");
           } else {
             window.$message.error("用户名或密码错误");
-            route.replace("/")
+            route.replace("/MainWindow")
           }
         });
 }
@@ -67,6 +67,7 @@ const handleValidateButtonClick = function(e){
     /* background-color: white; */
     background-image: url('@/assets/bg.png');
     transition: 1s;
+    z-index: 10;
 }
 .login_window{
     width: 300px;

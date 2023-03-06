@@ -38,20 +38,6 @@
           </div>
       </div>
       </n-layout-sider>
-      <n-layout>
-        <n-layout >
-          <div style="display: flex;padding: 10px;height: 100%;">
-            <router-view></router-view>
-          </div>
-        </n-layout>
-        <n-layout-footer
-          bordered
-          position="absolute"
-          style="height: 30px;"
-        >
-          <status-bar></status-bar>
-        </n-layout-footer>
-      </n-layout>
     </n-layout>
 </template>
 <script setup>
@@ -59,11 +45,10 @@ import store from '@/store'
 import { ref,h ,toRaw } from "vue";
 import route from '@/router'
 import { NIcon } from 'naive-ui'
-import StatusBar from '@/views/StatusBar.vue'
-import { Color20Filled,Accessibility20Filled,Dialpad20Filled,AlignRight20Filled,Settings20Filled,PuzzleCube20Filled,BookNumber20Filled ,Library20Filled,Key20Filled,ArrowReset20Filled, Globe20Filled, Edit20Filled} from "@vicons/fluent"
+import { Color20Filled,Accessibility20Filled,AlignRight20Filled,Settings20Filled ,Library20Filled, BookInformation20Filled} from "@vicons/fluent"
 import { MdHelpCircle,MdExit } from '@vicons/ionicons4'
  
-const collapsed = ref(true)
+const collapsed = ref(false)
 const theme = ref('white')
 
 const selectMenu = function(key, item){
@@ -87,6 +72,7 @@ var iconMap = new Map([
   ['/UserManage',Accessibility20Filled],
   ['/theme',Color20Filled],
   ['/Help',MdHelpCircle],
+  ['/log',BookInformation20Filled],
 ])
 let aa = toRaw(store.state.mainMenus)
 let menus = aa.map(item => {
@@ -117,13 +103,12 @@ const exit = function(){
   margin-top: 5px;
   font-size: 12px;
   cursor: pointer;
+  margin-top: 20px;
 }
 .head_img{
   margin-bottom: 5px;
   width: 60px;
   height: 22px;
-  /* border-radius: 20px; */
-  /* border: 1px solid rgb(148, 2, 2); */
   background-image: url('@/assets/Hikvision\ Logo-R.svg');
   background-size: cover;
 }

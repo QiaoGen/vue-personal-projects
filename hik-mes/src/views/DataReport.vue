@@ -14,7 +14,8 @@
                     <n-date-picker v-model:value="range" type="daterange" clearable />
                 </n-form-item>
             </n-form>
-            <n-button circle>
+            <n-button type="success">
+                查询
                 <template #icon>
                     <n-icon><md-search></md-search></n-icon>
                 </template>
@@ -22,6 +23,7 @@
         </div>
     </div>
     <n-data-table
+        style="padding:0px 10px;"
         bordered="true"
         :columns="columns"
         :data="data"
@@ -67,6 +69,10 @@ const range = ref([dayjs(new Date()).startOf('d').valueOf(), dayjs(new Date()).e
 .father{
     display: flex;
     flex-direction: column;
+    /* margin: 10px; */
+}
+.search{
+    margin: 10px 10px 0 10px;
 }
 .search_bar{
     /* border: 1px solid lightgray; */

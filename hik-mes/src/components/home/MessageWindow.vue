@@ -26,7 +26,7 @@ const params = defineProps({
 .fater{
     background-color: black;
     color: white;
-    min-height: 200px;
+    min-height: 100px;
     border: 1px solid gray;
     text-indent: 5px;
 }
