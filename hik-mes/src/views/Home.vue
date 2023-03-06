@@ -1,15 +1,24 @@
 <template>
-  <div style="height: 100%;display: flex;flex-direction: column;">
-    <head-guider class="fix_head" :msgNum="msgNum"/>
-    <!-- <div style="height:40px;"></div> -->
-    <router-view style="flex: auto;"/>
+  <div class="home">
+    <!-- <head-guider class="fix_head" :msgNum="msgNum"/>
+    <router-view style="flex: auto;"/> -->
+      <menu-bar></menu-bar>
+      <!-- <div class="operation">
+        <div class="o_content">
+
+        </div>
+        <div class="button_bar">
+          我是底部
+        </div>
+      </div> -->
   </div>
 </template>
 
 <script setup>
-import headGuider from '@/components/home/headGuider.vue'
+// import headGuider from '@/components/home/headGuider.vue'
 import { ref ,onBeforeUnmount} from 'vue'
 import { ipcRenderer } from 'electron'; 
+import MenuBar from '@/views/MenuBar.vue';
 const msgNum = ref(0)
 
 // 设备告警信息/PLC数据
@@ -66,7 +75,7 @@ const heartbeat = setInterval(() => {
 
 // 移除监听器
 onBeforeUnmount(() => {
-  ipcRenderer.removeAllListener('sysInfo-reply')
+  // ipcRenderer.removeAllListener('sysInfo-reply')
   clearInterval(heartbeat)
 })
 </script>
@@ -77,5 +86,23 @@ onBeforeUnmount(() => {
   /* height: 300px; */
   /* position: fixed;
   top: 0; */
+}
+.home{
+  height: 100%;
+  width: 100%;
+  /* background-color: lightpink; */
+  display: flex;
+  flex-direction: column;;
+}
+.operation{
+  display: flex;
+  flex-direction: row;
+}
+.o_content{
+  background-color: lightgray;
+}
+.button_bar{
+  height: 100px;
+  margin-bottom: auto;
 }
 </style>

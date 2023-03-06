@@ -97,18 +97,7 @@ const plcConnectionStatus = ref(false)
 const tcpConnectionStatus = ref(false)
 
 const formRef = ref(null)
-// const model = ref({
-//     WorkStation: ref(computed(() => {
-//     return store.state.WorkStation
-// })),
-//     MachineId: ref(computed(() => {
-//     return store.state.MachineId
-// }))
-// })
-// const model = ref({
-//     WorkStation: store.state.WorkStation,
-//     MachineId: store.state.MachineId
-// })
+
 const model = ref({
     WorkStation: null,
     MachineId: null,

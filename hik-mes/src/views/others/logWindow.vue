@@ -50,6 +50,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .log_f{
+  width: 100%;
+  height: 800px;
   display: flex;
 }
 .log_list{
