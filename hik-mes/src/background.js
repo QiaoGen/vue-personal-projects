@@ -7,7 +7,7 @@ import log from '@/utils/log.js'
 import logReader from '@/utils/logReader'
 import s7client from'@/lib/s7Client'
 import tcpp from 'tcp-ping'
-
+import constant from '@/lib/constant'
 import mysql from '@/lib/mysql'
 
 mysql.connect()
@@ -123,6 +123,77 @@ ipcMain.on('mysql-msg',function(event, ...arg){
           result.msg = '删除集成码失败'
           result.success = false
           event.sender.send('deletePkgNumber-reply', result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case 'updateBarcdPkgStatus':
+        //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
+        mysql.updateBarcdPkgStatus(JSON.parse(arg[1])).then(res => {
+          result.msg = '集成码入库成功'
+          event.sender.send('updateBarcdPkgStatus-reply', result)
+        }).catch(err => {
+          result.msg = '集成码插入数据库失败'
+          result.success = false
+          event.sender.send('updateBarcdPkgStatus-reply', result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case 'deleteAllBarcd':
+        mysql.deleteAllBarcd().then(res => {
+          result.msg = '删除成功'
+          event.sender.send('deleteAllBarcd-reply', result)
+        }).catch(err => {
+          result.msg = '删除失败'
+          result.success = false
+          event.sender.send('deleteAllBarcd-reply', result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case constant.mysql.searchBarcdList:
+        mysql.searchBarcdList(JSON.parse(arg[1])).then(res => {
+          result.success = true
+          result.msg = res
+          event.sender.send(constant.mysql.searchBarcdList_reply, result)
+        }).catch(err => {
+          result.msg = err
+          result.success = false
+          event.sender.send(constant.mysql.searchBarcdList_reply, result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case constant.mysql.queryAllUser:
+        mysql.queryAllUser().then(res => {
+          result.success = true
+          result.msg = res
+          event.sender.send(constant.mysql.queryAllUser_reply, result)
+        }).catch(err => {
+          result.msg = err
+          result.success = false
+          event.sender.send(constant.mysql.queryAllUser_reply, result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case constant.mysql.updateUser:
+        mysql.updateUser(JSON.parse(arg[1])).then(res => {
+          result.success = true
+          result.msg = res
+          event.sender.send(constant.mysql.updateUser_reply, result)
+        }).catch(err => {
+          result.msg = err
+          result.success = false
+          event.sender.send(constant.mysql.updateUser_reply, result)
+          log.error('数据库异常'+err)
+        })
+      break;
+      case constant.mysql.queryByUser:
+        mysql.queryByUser(JSON.parse(arg[1])).then(res => {
+          result.success = true
+          result.msg = res
+          event.sender.send(constant.mysql.queryByUser_reply, result)
+        }).catch(err => {
+          result.msg = err
+          result.success = false
+          event.sender.send(constant.mysql.queryByUser_reply, result)
           log.error('数据库异常'+err)
         })
       break;

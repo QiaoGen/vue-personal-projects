@@ -8,6 +8,8 @@ const store = createStore({
             MachineId: '2'
         },
         theme: 'white',
+        role: null,
+        name: null,
         mainMenus : [
             {
                 key:"/MainWindow",
@@ -48,6 +50,12 @@ const store = createStore({
         },
         updateTheme(state, theme){
             state.theme = theme
+        },
+        updateRole(state, role){
+            state.role = role
+        },
+        updateName(state, name){
+            state.name = name
         }
     },
     actions:{

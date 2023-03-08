@@ -13,7 +13,7 @@
       <div style="height: 100%;display: flex; flex-direction: column; justify-content: flex-start;">
         <div class="user">
           <div class="head_img"></div>
-          <div>管理员</div>
+          <div>{{name}}</div>
         </div>
         <n-menu
               accordion
@@ -42,7 +42,7 @@
 </template>
 <script setup>
 import store from '@/store'
-import { ref,h ,toRaw } from "vue";
+import { ref,h ,toRaw, computed } from "vue";
 import route from '@/router'
 import { NIcon } from 'naive-ui'
 import { Color20Filled,Accessibility20Filled,AlignRight20Filled,Settings20Filled ,Library20Filled, BookInformation20Filled} from "@vicons/fluent"
@@ -50,6 +50,9 @@ import { MdHelpCircle,MdExit } from '@vicons/ionicons4'
  
 const collapsed = ref(false)
 const theme = ref('white')
+const name = computed(() => {
+  return store.state.name
+})
 
 const selectMenu = function(key, item){
   if(item.key === '/theme'){

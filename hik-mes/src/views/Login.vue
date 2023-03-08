@@ -1,6 +1,7 @@
 <template>
     <div class="father">
         <div class="login_window">
+            <div class="big_title">海康包装线登陆</div>
             <n-form ref="formRef" :model="model" :rules="rules">
                 <n-form-item path="username" label="用户名：">
                     <n-input v-model:value="model.username" placeholder="请输入用户名" :maxlength="16"></n-input>
@@ -18,8 +19,12 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { onBeforeUnmount, reactive, ref } from "vue";
 import route from"@/router"
+import { ipcRenderer } from "electron";
+import constant from "@/lib/constant";
+import store from '@/store'
+
 const formRef = ref(null)
 const model = ref({
     username: null,
@@ -43,13 +48,32 @@ const handleValidateButtonClick = function(e){
     e.preventDefault();
         formRef.value?.validate((errors) => {
           if (!errors) {
-            window.$message.success("登陆成功");
+            login()
           } else {
-            window.$message.error("用户名或密码错误");
-            route.replace("/MainWindow")
+            // route.replace("/MainWindow")
           }
         });
 }
+
+const login = function(){
+    let param = [model.value.username, model.value.password]
+    ipcRenderer.send('mysql-msg', constant.mysql.queryByUser, JSON.stringify(param))
+
+}
+ipcRenderer.on(constant.mysql.queryByUser_reply, function(event, arg){
+    if(arg.success && arg.msg.length == 1){
+        store.commit('updateRole', arg.msg[0].role)
+        store.commit('updateName', arg.msg[0].name)
+        route.replace("/MainWindow")
+    }else{
+        window.$message.error("用户名或密码错误");
+        model.value = {username: null, password: null}
+    }
+})
+
+onBeforeUnmount(() => {
+    ipcRenderer.removeAllListeners(constant.mysql.queryByUser_reply)
+})
 
 </script>
 
@@ -73,7 +97,12 @@ const handleValidateButtonClick = function(e){
     width: 300px;
     border: 1px solid rgb(255, 255, 255);
     border-radius: 10px;
-    padding: 40px 20px;
+    padding: 20px 20px;
     background-color: white;
+}
+.big_title{
+    font-size: 30px;
+    color: black;
+    margin-bottom: 20px;
 }
 </style>
