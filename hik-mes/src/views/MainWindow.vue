@@ -83,7 +83,7 @@ const barcdStatus = ref(true)
 const pkgNumberStatus = ref(true)
 const printStatus = ref(true)
 //存储序列号数据交互信息
-const barcdMsg = reactive([{ type: 'plc', msg: 'werwerwer', info: 'info' }, { type: 'mes', msg: 'fsfsdfsdf', info: 'info' }, { type: 'plc', msg: 'werwerwer', info: 'error' }])
+const barcdMsg = reactive([{ type: 'plc', msg: 'read plc', info: 'info' }, { type: 'mes', msg: 'valid barcd', info: 'info' }, { type: 'plc', msg: 'plc read failed ', info: 'error' }])
 const pkgNumberMsg = reactive([])
 
 const readyValidBarcd = ref([])//多选

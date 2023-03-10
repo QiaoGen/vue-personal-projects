@@ -25,6 +25,9 @@ import { ipcRenderer } from "electron";
 import constant from "@/lib/constant";
 import store from '@/store'
 
+//重制menu刷新状态
+store.commit('updateMenu', false)
+
 const formRef = ref(null)
 const model = ref({
     username: null,
@@ -64,6 +67,7 @@ ipcRenderer.on(constant.mysql.queryByUser_reply, function(event, arg){
     if(arg.success && arg.msg.length == 1){
         store.commit('updateRole', arg.msg[0].role)
         store.commit('updateName', arg.msg[0].name)
+        store.commit('updateMenu', true)
         route.replace("/MainWindow")
     }else{
         window.$message.error("用户名或密码错误");

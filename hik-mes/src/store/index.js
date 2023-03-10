@@ -4,12 +4,13 @@ import persistedState from 'vuex-persistedstate'
 const store = createStore({
     state:{
         sysConfig:{
-            WorkStation: '1',
-            MachineId: '2'
+            WorkStation: null,
+            MachineId: null
         },
         theme: 'white',
         role: null,
         name: null,
+        updateMenu: false,
         mainMenus : [
             {
                 key:"/MainWindow",
@@ -18,6 +19,7 @@ const store = createStore({
             {
                 key:"/SysManager",
                 label: "系统管理",
+                authorization: [0]
             },
             {
                 key:"/DataReport",
@@ -30,6 +32,7 @@ const store = createStore({
             {
                 key:"/log",
                 label: "日志",
+                authorization: [0]
             },
             {
                 key:"/theme",
@@ -56,6 +59,9 @@ const store = createStore({
         },
         updateName(state, name){
             state.name = name
+        },
+        updateMenu(state, updateMenu){
+            state.updateMenu = updateMenu
         }
     },
     actions:{
