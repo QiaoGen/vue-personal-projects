@@ -9,11 +9,15 @@ const routes = [
     path: '/MainWindow',
     name: 'MainWindow',
     component: () => import('@/views/MainWindow.vue')
+  }, {
+    path: '/Alarm',
+    name: 'Alarm',
+    component: () => import('@/views/Alarm.vue')
   },
   {
-   path: '/Help',
-   name: 'Help',
-   component: () => import('@/views/Help.vue')
+    path: '/Help',
+    name: 'Help',
+    component: () => import('@/views/Help.vue')
   },
   {
     path: '/SysManager',
@@ -46,7 +50,7 @@ const routes = [
     name: 'login',
     component: () => import('@/views/Login.vue')
   }
-  
+
 ]
 
 const router = createRouter({

@@ -48,6 +48,10 @@ const rules = reactive({
 })
 
 const handleValidateButtonClick = function(e){
+    if(process.env.NODE_ENV == 'development'){
+        route.replace("/MainWindow")
+        return
+    }
     e.preventDefault();
         formRef.value?.validate((errors) => {
           if (!errors) {
@@ -59,6 +63,8 @@ const handleValidateButtonClick = function(e){
 }
 
 const login = function(){
+    
+    
     let param = [model.value.username, model.value.password]
     ipcRenderer.send('mysql-msg', constant.mysql.queryByUser, JSON.stringify(param))
 

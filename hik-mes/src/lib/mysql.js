@@ -26,6 +26,21 @@ const connect = function () {
     })
 }
 
+const insertBarcd = function(param){
+    return new Promise((resolve,reject) => {
+        pool.execute(
+            'insert into `barcd_list`(`Barcd`) values(?)',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.stringify(results))
+            }
+        )
+    })
+}
+
 const querySysConfig = function () {
     return new Promise((resolve, reject) => {
         pool.query(
@@ -73,21 +88,21 @@ const queryReadyBarcdList = function () {
 }
 
 const queryAllUser = function () {
-    return new Promise((reslove, reject) => {
+    return new Promise((resolve, reject) => {
         pool.query(
             'select * from `user`',
             function (err, results, fields) {
                 if (err) {
                     reject(err)
                 }
-                reslove(results)
+                resolve(results)
             }
         )
     })
 }
 
 const queryByUser = function(param){
-    return new Promise((reslove, reject) => {
+    return new Promise((resolve, reject) => {
         pool.query(
             'select * from `user` where `username` = ? and `password` = ?',
             param,
@@ -95,7 +110,7 @@ const queryByUser = function(param){
                 if (err) {
                     reject(err)
                 }
-                reslove(results)
+                resolve(results)
             }
         )
     })
@@ -242,14 +257,14 @@ const updateSysConfig = function (param1) {
 }
 
 const deleteAllBarcd = function () {
-    return new Promise((reslove, reject) => {
+    return new Promise((resolve, reject) => {
         pool.execute(
             'update `barcd_list` set `deleted` = 1',
             function (err, results, fields) {
                 if (err) {
                     reject(err)
                 }
-                reslove(results)
+                resolve(results)
             }
         )
     })
@@ -289,6 +304,7 @@ const searchBarcdList = function (param) {
 
 export default {
     connect,
+    insertBarcd,
     querySysConfig,
     queryBarcdList,
     queryPkgNumberList,

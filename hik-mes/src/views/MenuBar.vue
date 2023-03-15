@@ -28,7 +28,7 @@ import store from '@/store'
 import { ref, h, toRaw, computed, watch } from "vue";
 import route from '@/router'
 import { NIcon } from 'naive-ui'
-import { Color20Filled, Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled } from "@vicons/fluent"
+import { Color20Filled, Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
 
 const collapsed = ref(false)
@@ -60,6 +60,7 @@ function renderIcon(icon) {
 
 var iconMap = new Map([
   ['/MainWindow', AlignRight20Filled],
+  ['/Alarm', ClockAlarm20Filled],
   ['/SysManager', Settings20Filled],
   ['/DataReport', Library20Filled],
   ['/UserManage', Accessibility20Filled],

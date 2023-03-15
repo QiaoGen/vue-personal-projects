@@ -17,6 +17,10 @@ const store = createStore({
                 label: "主界面",
             },
             {
+                key:"/Alarm",
+                label: "异常告警",
+            },
+            {
                 key:"/SysManager",
                 label: "系统管理",
                 authorization: [0]
