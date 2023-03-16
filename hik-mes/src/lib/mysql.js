@@ -24,6 +24,92 @@ const connect = function () {
         dateStrings: true,
         timezone: 'utc'
     })
+    initializeDB()
+}
+
+//索引创建语句必须跟在table后， 不可以换行
+const initializeDB = function(){
+    log.info('initializeDB')
+    pool.execute(
+        'show tables like "sys_config"',
+        function (err, results, fields) {
+            if (err) {
+                log.error(err)
+                reject(err)
+            }
+            log.info(JSON.stringify(results))
+            if(results.length == 1){
+                log.info('db already')
+            }else{
+                log.info('create table')
+                pool.query(
+                    'create table if not exists barcd_list'
+                   +' ('
+                   +' Id int auto_increment,'
+                   +'     Barcd varchar(30) null,'
+                   +'     Deleted int default 0 null,'
+                   +'     ValidStatus int default 0 null comment "0:未验证 1:已验证",'
+                   +'     PkgNumber varchar(30) null comment "集成码",'
+                   +'     PkgStatus int default 0 null comment "0:未集成 1:已集成",'
+                   +'     CreateTime timestamp default CURRENT_TIMESTAMP null,'
+                   +'     constraint barch_list_Barcd_uindex'
+                   +'         unique (Barcd),'
+                   +'     constraint barch_list_Id_uindex'
+                   +'         unique (Id)'
+                   +' )'
+                   +' comment "序列号表";create index index_barcd_time on barcd_list (CreateTime);create index index_grep_deleted_valid on barcd_list (`Deleted`, `ValidStatus`);alter table barcd_list add primary key (Id);'
+                   +'create table if not exists pkg_number_list'
+                   +' ('
+                   +'     Id int auto_increment,'
+                   +'     PkgNumber varchar(20) null,'
+                   +'     Deleted int default 0 not null,'
+                   +'     PrintStatus int default 0 null comment "0:未打印 1:已打印",'
+                   +'     CreateTime timestamp default CURRENT_TIMESTAMP null,'
+                   +'     constraint pkg_number_list_Id_uindex'
+                   +'         unique (Id)'
+                   +' )'
+                   +' comment "集成码表";alter table pkg_number_list add primary key (Id);'
+                   +'create table if not exists sys_config'
+                   +' ('
+                   +'     WorkStation varchar(20) null,'
+                   +'     MachineId varchar(20) null,'
+                   +'     PrintIP varchar(20) null,'
+                   +'     PrintPort int null,'
+                   +'     PLCIP varchar(20) null'
+                   +' );'
+                   +'create table if not exists user'
+                   +' ('
+                   +'     id int auto_increment'
+                   +'         primary key,'
+                   +'     username varchar(20) null,'
+                   +'     password varchar(60) null,'
+                   +'     role int null,'
+                   +'     name varchar(10) null,'
+                   +'     constraint user_username_uindex'
+                   +'         unique (username)'
+                   +' );INSERT INTO user (id, username, password, role, name) VALUES (1, "root", "root", 0, "管理员");'
+                   +'INSERT INTO user (id, username, password, role, name) VALUES (2, "operate", "root1", 1, "操作员");'
+                   +'INSERT INTO sys_config (WorkStation, MachineId, PrintIP, PrintPort, PLCIP) VALUES ("T30085", "hzdz-123456", "127.0.0.1", 8003, "192.168.2.1");'
+                   +'create table alarm'
+                   +' ('
+                   +'     id int auto_increment,'
+                   +'     Content text null,'
+                   +'     CreateTime timestamp default now() null,'
+                   +'     Updated int default 0 null comment "上报状态：0: 未上报1: 已上报",'
+                   +'     constraint alarm_pk'
+                   +'         primary key (id)'
+                   +' )'
+                   +' comment "异常告警";create index index_alarm_time on alarm(CreateTime);'
+                ,
+                    function (err, results, fields) {
+                        if(err){
+                            log.error(err)
+                        }
+                    }
+                )
+            }
+        }
+    )
 }
 
 const insertBarcd = function(param){

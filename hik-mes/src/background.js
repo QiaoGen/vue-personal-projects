@@ -48,39 +48,6 @@ ipcMain.on('plc-msg', function (event, ...arg) {
       connectPLC()
       event.sender.send('getPLCInfo-reply', PLCInfo)
       break;
-    // case constant.plcCommand.barcdSign.name:
-    //   s7client.read(arg[1]).then(res => {
-    //     result.success = true
-    //     result.value = res
-    //     event.sender.send(constant.plcCommand.barcdSign.reply, result)
-    //   }).catch(err => {
-    //     result.success = false
-    //     result.value = err
-    //     event.sender.send(constant.plcCommand.barcdSign.reply, result)
-    //   })
-    // break;
-    // case constant.plcCommand.barcd.name:
-    //   s7client.read(arg[1]).then(res => {
-    //     result.success = true
-    //     result.value = res
-    //     event.sender.send(constant.plcCommand.barcd.reply, result)
-    //   }).catch(err => {
-    //     result.success = false
-    //     result.value = err
-    //     event.sender.send(constant.plcCommand.barcd.reply, result)
-    //   })
-    // break;
-    // case 'write':
-    //   s7client.write(arg[1],arg[2]).then(res => {
-    //     result.success = true
-    //     result.value = res
-    //     event.sender.send(arg[1].reply, result)
-    //   }).catch(err => {
-    //     result.success = false
-    //     result.value = err
-    //     event.sender.send(arg[1].reply, result)
-    //   })
-    // break;
   }
 })
 
