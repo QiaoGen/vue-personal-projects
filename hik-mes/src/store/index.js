@@ -38,10 +38,10 @@ const store = createStore({
                 label: "日志",
                 authorization: [0]
             },
-            {
-                key:"/theme",
-                label: "主题",
-            },
+            // {
+            //     key:"/theme",
+            //     label: "主题",
+            // },
             {
                 key:"/Help",
                 label: "帮助",

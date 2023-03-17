@@ -7,7 +7,7 @@
       <div class="centent">
         <n-layout style="height: 100%;">
           <router-view v-slot="{ Component }" >
-          <keep-alive include="MainWindow">
+          <keep-alive include="[MainWindow,Alarm]">
             <component :is="Component" />
           </keep-alive>
         </router-view>
