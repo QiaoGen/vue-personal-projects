@@ -48,10 +48,10 @@ const rules = reactive({
 })
 
 const handleValidateButtonClick = function(e){
-    if(process.env.NODE_ENV == 'development'){
-        route.replace("/MainWindow")
-        return
-    }
+    // if(process.env.NODE_ENV == 'development'){
+    //     route.replace("/MainWindow")
+    //     return
+    // }
     e.preventDefault();
         formRef.value?.validate((errors) => {
           if (!errors) {
@@ -98,8 +98,9 @@ onBeforeUnmount(() => {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: white;
     /* background-color: white; */
-    background-image: url('@/assets/bg.png');
+    background-image: url('/public/bg.png');
     transition: 1s;
     z-index: 10;
 }

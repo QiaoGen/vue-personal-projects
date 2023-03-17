@@ -127,10 +127,13 @@ const catchValidedBarcd = setInterval(() => {
     }
     addPkgNumberMsg('plc','获取称重标识位', 'info')
     ipcRenderer.invoke('plc-msg-invoke','read',constant.plcCommand.weightSign).then(weightSignResult => {
-        // if(!weightSignResult.success || weightSignResult.value[0] == 0){
-        //     //标识位为无
-        //     return
-        // }
+        if(!weightSignResult.success){
+            addPkgNumberMsg('plc', weightSignResult.value, 'error')
+        }
+        if(!weightSignResult.success || weightSignResult.value[0] == 0){
+            //标识位为无
+            return
+        }
         // ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weight, getUint8Array(4, function (view) { view.setUint32(0, 2345); })).then(weightResult => {
         // })
         ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.weight).then(weightResult => {
@@ -241,7 +244,7 @@ const catchBarcd = setInterval(() => {
             }
         } else {
             // console.error('msg:',barcdMsg.value)
-            barcdMsg.value.push({ type: 'plc', info: 'error', msg: result.value })
+            addBarcdMsg('plc',result.value, 'error')
             console.error(result.value)
         }
     })

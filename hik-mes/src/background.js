@@ -9,6 +9,7 @@ import s7client from '@/lib/s7Client'
 import tcpp from 'tcp-ping'
 import constant from '@/lib/constant'
 import mysql from '@/lib/mysql'
+import electron from 'electron'
 
 mysql.connect()
 
@@ -328,7 +329,9 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+const Menu = electron.Menu
 async function createWindow() {
+  Menu.setApplicationMenu(null)
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,

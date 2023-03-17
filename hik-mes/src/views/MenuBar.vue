@@ -125,7 +125,7 @@ watch(updateMenu, (value, old) => {
   margin-bottom: 5px;
   width: 60px;
   height: 22px;
-  background-image: url('@/assets/Hikvision\ Logo-R.svg');
+  background-image: url('/public/Hikvision\ Logo-R.svg');
   background-size: cover;
 }
 
