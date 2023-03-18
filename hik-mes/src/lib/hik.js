@@ -54,27 +54,28 @@ const validBarcd = function(Barcd){
 // 不能将成功的判定条件定为 ErrCode =0，判定成功逻辑为 PkgNumber 有内容且以@开头
 const getPkgNumber = function(param){
     return new Promise((resolve,reject) =>{
-        let requestBody = {
-            Id: "1234567",
-            ServerName: "SCAN_BARCD_SUBMIT",
-            WorkStation: store.state.sysConfig.WorkStation,
-            MachineId: store.state.sysConfig.MachineId,
-            Datas: param,
-            Print:{
-                PrintSeverName:"CQ_NVR1",
-                PrintName:""
-            }
-        }
-        require.post(requestBody).then(res => {
-            if(res.ErrCode === 700022){
-                resolve(res)
-            }else if(res.ErrCode != 0){
-                reject(res)
-            }
-            resolve(res)
-        }).catch(err => {
-            reject(err)
-        })
+        resolve('pkg success')
+        // let requestBody = {
+        //     Id: "1234567",
+        //     ServerName: "SCAN_BARCD_SUBMIT",
+        //     WorkStation: store.state.sysConfig.WorkStation,
+        //     MachineId: store.state.sysConfig.MachineId,
+        //     Datas: param,
+        //     Print:{
+        //         PrintSeverName:"CQ_NVR1",
+        //         PrintName:""
+        //     }
+        // }
+        // require.post(requestBody).then(res => {
+        //     if(res.ErrCode === 700022){
+        //         resolve(res)
+        //     }else if(res.ErrCode != 0){
+        //         reject(res)
+        //     }
+        //     resolve(res)
+        // }).catch(err => {
+        //     reject(err)
+        // })
     })
 }
 

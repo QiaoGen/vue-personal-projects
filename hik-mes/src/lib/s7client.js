@@ -40,6 +40,7 @@ const read = function (param) {
 
 //总write
 const write = function (param, buffer) {
+    log.info('plc_param_write:' + JSON.stringify(param) + buffer)
     return new Promise((reslove, reject) => {
         switch (param.area) {
             case constant.areas.M:

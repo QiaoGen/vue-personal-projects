@@ -62,7 +62,7 @@ const catchAlarm = setInterval(() => {
           // console.log(numStr)
           for (let n = numStr.length - 1; n >= 0; n--) {
             if (numStr[n] == '1') {
-              let index = 7-n + (i+1)*8
+              let index = 7-n + i*8                              
               indexArray.push(index)
               addAlarm(index, allAlarm[index])
             }

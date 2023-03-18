@@ -91,15 +91,28 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
+  log.info('mysql-msg-invoke:'+ arg)
   switch(arg[0]){
     case constant.mysql.insertBarcd:
-      await mysql.insertBarcd([arg[1]]).then(res => {
+      log.info(JSON.parse(arg[1]))
+      await mysql.insertBarcd(JSON.parse(arg[1])).then(res => {
         result.msg = 'insert '+ arg[1] + ' success'; 
         result.value = res
       }).catch(err => {
         result.success = false
         result.msg = err
       })
+    break;
+    case constant.mysql.searchBarcdList:
+      await mysql.searchBarcdList(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
   }
   return result
 })
@@ -147,15 +160,15 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
         log.error(err)
       })
       break;
-    case 'updateBarcdValidStatus':
-      //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
-      mysql.updateBarcdValidStatus(JSON.parse(arg[1])).then(res => {
-        // event.sender.send('updateBarcdValidStatus-reply', res)
-      }).catch(err => {
-        event.sender.send('updateBarcdValidStatus-reply', '数据库异常')
-        log.error('数据库异常' + err)
-      })
-      break;
+    // case 'updateBarcdValidStatus':
+    //   //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
+    //   mysql.updateBarcdValidStatus(JSON.parse(arg[1])).then(res => {
+    //     // event.sender.send('updateBarcdValidStatus-reply', res)
+    //   }).catch(err => {
+    //     event.sender.send('updateBarcdValidStatus-reply', '数据库异常')
+    //     log.error('数据库异常' + err)
+    //   })
+    //   break;
     case 'deleteBarcd':
       //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
       mysql.updateBarcdDeleteStatus(JSON.parse(arg[1])).then(res => {
@@ -356,6 +369,11 @@ async function createWindow() {
       hash: '/login'
     })
   }
+  
+  win.on('close', function(){
+    log.info('quit')
+    win.destroy()
+  })
 }
 
 // Quit when all windows are closed.
@@ -363,6 +381,8 @@ app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
+    app.quit()
+  }else{
     app.quit()
   }
 })

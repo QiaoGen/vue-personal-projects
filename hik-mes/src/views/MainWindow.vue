@@ -4,18 +4,19 @@
             <div class="title">序列号校验</div>
             <div style="padding:10px;">
                 <div>产品序列号:</div>
-                <div class="result">{{barcd}}</div>
+                <div class="result">{{ barcd }}</div>
                 <div>MES校验结果:</div>
                 <div class="result" style="height: 160px;line-height: 20px;">
                     {{ mesValidMsg }} </div>
                 <div style="display: flex;align-items: center;margin-bottom: 10px;">
                     <div>校验标志</div>
                     <div :class="barcdStatus ? 'point_green' : 'point'"></div>
-                    <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;"
-                        type="error">复位</n-button>
+                    <!-- <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button> -->
                 </div>
             </div>
             <message-window class="msg_window" :msg="barcdMsg"></message-window>
+            {{ msg }}
+
         </div>
         <div class="card" style="width: 60%;">
             <div class="title">集成码打印</div>
@@ -41,15 +42,14 @@
                 <div class="barch_f">
                     <div class="card_head">
                         <div style="margin-right: 0px;margin-left: auto;">
-                            <n-button @click="generatePkgNumber" secondary
+                            <!-- <n-button @click="generatePkgNumber" secondary
                                 :disabled="readyValidBarcd.length == 0 || readyValidBarcd.length != 100" type="success"
-                                style="margin-right: 5px;margin-left: auto;">生成集成码</n-button>
-                            <n-button @click="deleteValidBarcd" secondary :disabled="readyValidBarcd.length == 0"
-                                type="error" style="margin-right: 5px;">删除</n-button>
+                                style="margin-right: 5px;margin-left: auto;">生成集成码</n-button> -->
                             <n-checkbox
                                 :checked="readyValidBarcd.length == readyBarcdList.length && readyBarcdList.length != 0"
-                                label="全选" @update:checked="selectAllReadyValidBarcd"
-                                style="margin-right: 0px;margin-left: auto;" />
+                                label="全选" @update:checked="selectAllReadyValidBarcd" style="margin-left: 11px;" />
+                            <n-button @click="deleteValidBarcd" secondary :disabled="readyValidBarcd.length == 0"
+                                type="error" style="margin-right: 5px;">删除</n-button>
                         </div>
                     </div>
                     <n-checkbox-group v-model:value="readyValidBarcd" @update:value="selectReadyValidBarcd">
@@ -64,6 +64,7 @@
                 </div>
             </div>
             <message-window class="msg_window" :msg="pkgNumberMsg"></message-window>
+            <n-switch v-model:value="flag"></n-switch>
         </div>
     </div>
 </template>
@@ -120,33 +121,52 @@ const selectAllReadyValidBarcd = function (e) {
 //获取已验证序列号
 const catchValidedBarcd = setInterval(() => {
     getReadyBarcdList()
+}, 2000);
+
+//获取集成码数据
+const getWeight = function () {
     //获取称重数据
     //判断是否满箱（100）=> 获取集成码
-    if (readyBarcdList.value.length == 100 && weight.value != null) {
-        generatePkgNumber()
-    }
-    addPkgNumberMsg('plc','获取称重标识位', 'info')
-    ipcRenderer.invoke('plc-msg-invoke','read',constant.plcCommand.weightSign).then(weightSignResult => {
-        if(!weightSignResult.success){
+
+    addPkgNumberMsg('plc', '读取称重标识位', 'info')
+    ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.weightSign).then(weightSignResult => {
+        // ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weightSign, Buffer.from([1])).then(weightResult => {
+        // })
+        // ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weight, getUint8Array(4, function (view) { view.setUint32(0, 2345); })).then(weightResult => {
+        // })
+        if (!weightSignResult.success) {
             addPkgNumberMsg('plc', weightSignResult.value, 'error')
+            return
         }
-        if(!weightSignResult.success || weightSignResult.value[0] == 0){
+        if (weightSignResult.value[0] == 0) {
             //标识位为无
             return
         }
-        // ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weight, getUint8Array(4, function (view) { view.setUint32(0, 2345); })).then(weightResult => {
-        // })
         ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.weight).then(weightResult => {
             console.log(weightResult)
-            if(weightResult.success){
+            if (weightResult.success) {
                 let weightTemp = utils.getView(weightResult.value).getUint32()
-                weight.value = weightTemp/100
-                addPkgNumberMsg('plc', '读取称重数据'+weightTemp+ 'g', 'info')
+                weight.value = weightTemp / 1000
+                if (readyBarcdList.value.length == 5 && weight.value != null) {
+                    generatePkgNumber()
+                }
+                addPkgNumberMsg('plc', '读取称重数据' + weightTemp + 'g', 'info')
+                //称重标志位归位
             }
         })
     })
-}, 5000);
+}
 
+const resetWeightSign = function () {
+    ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weightSign, Buffer.from([0])).then(weightResult => {
+        addPkgNumberMsg('plc', '称重标志位归位', 'info')
+    })
+}
+const resetWeightSignError = function () {
+    ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.pkgNumberError, Buffer.from([1])).then(weightResult => {
+        addPkgNumberMsg('mes', 'mes称重错误标志位写入', 'error')
+    })
+}
 
 //将数值写入到视图中，获得其字节数组，大端字节序
 function getUint8Array(len, setNum) {
@@ -155,6 +175,7 @@ function getUint8Array(len, setNum) {
     return new Uint8Array(buffer); //创建一个字节数组，从缓存中拿取数据
 }
 
+const flag = ref(true)
 //生成集成码
 const generatePkgNumber = function () {
     let param = []
@@ -163,21 +184,34 @@ const generatePkgNumber = function () {
     }
     param.push({ Barcd: readyBarcdList.value[readyBarcdList.value.length - 1], PkgInfo: { Weigth: weight.value } })
     hik.getPkgNumber(param).then(res => {
-        if (res.ErrCode === 700022) {
-            window.$message.warning('mes打印服务失效')
+        // if (res.ErrCode === 700022) {
+        //     resetWeightSignError()
+        //     resetWeightSign()
+        //     window.$message.warning('mes打印服务失效')
+        //     return
+        // }
+        // pkgNumber.value = res.Data.PkgNumber
+        // //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
+        // let param = []
+        // param.push(pkgNumber.value)
+        // readyBarcdList.value.forEach(e => {
+        //     param.push(e)
+        // })
+        // param.push(pkgNumber.value)
+        // ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
+        // addPkgNumberMsg('mes', '获取集成码' + pkgNumber.value, 'info')
+        // resetWeightSign()
+
+        if (flag.value) {
+            resetWeightSign()
+        } else {
+            resetWeightSignError()
+            resetWeightSign()
         }
-        pkgNumber.value = res.Data.PkgNumber
-        //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
-        let param = []
-        param.push(pkgNumber.value)
-        readyBarcdList.value.forEach(e => {
-            param.push(e)
-        })
-        param.push(pkgNumber.value)
-        ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
-        addPkgNumberMsg('mes','获取集成码'+ pkgNumber.value,'info')
-        
+
     }).catch(err => {
+        resetWeightSignError()
+        resetWeightSign()
         console.error(err)
         window.$message.error('生成集成码失败')
     })
@@ -193,62 +227,124 @@ const generatePkgNumber = function () {
  * 4.入库
  * 3.验证
  * 4.修改验证状态
+ * 
+ * 
  */
 const catchBarcd = setInterval(() => {
+    catchBarcdFromPLC()
+    getWeight()
+}, 1000)
+
+const catchBarcdFromPLC = function () {
     if (!barcdStatus.value) {
         return
     }
     addBarcdMsg('plc', '读取Barcd标识位', 'info')
     ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcdSign).then((result) => {
         console.log(result)
-        if (result.success) {
-            if (result.value[0] == 0) {
-                addBarcdMsg('plc', '读取Barcd序列号', 'info')
-                ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcd).then(res => {
-                    console.log(res)
-                    let barcdTemp = 'Q01801190oqp'
-                    // let barcd = transArrayTobarcd(arg)
-                    if (barcdTemp.lenght == 0 || barcdTemp == null) {
-                        addBarcdMsg('plc', '序列号为空', 'error')
-                        ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.barcdSignError, Buffer.from([1])).then(barcdSignErrRes => {
-                            if (barcdSignErrRes.success) {
-                                addBarcdMsg('plc', '写入错误标识位成功', 'info')
-                            } else {
-                                addBarcdMsg('plc', '写入错误标识位失败', 'error')
-                            }
-                        })
-                        return
-                    }
-                    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, barcdTemp).then(addRes => {
-                        console.log(addRes)
-                        if (addRes.success) {
-                            barcd.value = barcdTemp
-                            //mes校验序列号
-                            validBarcd(barcdTemp)
-                        } else {
-                            if (addRes.msg.toString().indexOf('Duplicate entry') != -1) {
-                                addBarcdMsg('plc', '序列号' + barcdTemp + '重复', 'error')
-                                ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.barcdSignError, Buffer.from([1])).then(barcdSignErrRes => {
-                                    // console.log(barcdSignErrRes)
-                                    if (barcdSignErrRes.success) {
-                                        addBarcdMsg('plc', '写入错误标识位成功', 'info')
-                                    } else {
-                                        addBarcdMsg('plc', '写入错误标识位失败', 'error')
-                                    }
-                                })
-                                return
-                            }
-                        }
-                    })
-                })
-            }
-        } else {
+        if (!result.success) {
             // console.error('msg:',barcdMsg.value)
-            addBarcdMsg('plc',result.value, 'error')
+            addBarcdMsg('plc', result.value, 'error')
             console.error(result.value)
+            return
+        }
+        if (result.value[0] == 1) {
+            addBarcdMsg('plc', '读取Barcd序列号', 'info')
+            ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcd).then(res => {
+                console.log(res)
+                let barcdTemp = utils.transBarcd(res.value)
+                if (barcdTemp.length == 0 || barcdTemp == null) {
+                    addBarcdMsg('plc', '序列号为空', 'error')
+                    plcBarcdSignError()
+                    resetBarcdSign()
+                } else {
+                    barcd.value = barcdTemp
+                    addBarcdToDB(barcdTemp)
+                }
+            })
+        }
+        // addBarcdToDB('dddfdfdfd')
+    })
+}
+
+const addBarcdToDB = function (barcdTemp) {
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify([barcdTemp, null, null, null])).then(res => {
+        console.log(res)
+        if (res.success) {
+            if (res.value.length != 0) {
+                let repeatFlag = false
+                res.value.forEach(el => {
+                    repeatFlag = el.Deleted != 0 || el.PkgStatus == 0
+                })
+                //重复
+                if (repeatFlag) {
+                    addBarcdMsg('plc', '序列号' + barcdTemp + '重复', 'error')
+                    plcBarcdSignError()
+                    resetBarcdSign()
+                }
+            }else{
+                validBarcd(barcdTemp)
+            }
         }
     })
-}, 5000)
+
+    // ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, barcdTemp).then(addRes => {
+    //     console.log(addRes)
+    //     if (addRes.success) {
+    //         barcd.value = barcdTemp
+    //         //mes校验序列号
+    //         validBarcd(barcdTemp)
+    //     } else {
+    //         if (addRes.msg.toString().indexOf('Duplicate entry') != -1) {
+    //             addBarcdMsg('plc', '序列号' + barcdTemp + '重复', 'error')
+    //             plcBarcdSignError()
+    //             resetBarcdSign()
+    //         }
+    //     }
+    // })
+}
+//验证操作
+const validBarcd = function (barcd) {
+    hik.validBarcd(barcd).then(res => {
+       
+        // ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
+        mesValidMsg.value = 'MES校验成功'
+        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd])).then(addRes => {
+            console.log(addRes)
+        })
+        resetBarcdSign()
+        addBarcdMsg('mes', res, 'info')
+    }).catch(err => {
+        mesValidMsg.value = 'MES校验失败：' + err
+        plcBarcdSignError()
+        resetBarcdSign()
+        addBarcdMsg('mes', res, 'error')
+    })
+}
+
+//标志位复位 下次读取Barcd
+const resetBarcdSign = function () {
+    ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.barcdSign, Buffer.from([0])).then((result) => {
+        if (result.success) {
+            addBarcdMsg('plc', '标志位复位成功', 'info')
+        } else {
+            addBarcdMsg('plc', '标志位复位失败', 'error')
+        }
+    })
+}
+
+const msg = ref('1')
+const plcBarcdSignError = function () {
+    ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.barcdSignError, Buffer.from([1])).then(barcdSignErrRes => {
+        // console.log(barcdSignErrRes)
+        msg.value = '写入错误标识位成功'
+        if (barcdSignErrRes.success) {
+            addBarcdMsg('plc', '写入错误标识位成功', 'info')
+        } else {
+            addBarcdMsg('plc', '写入错误标识位失败', 'error')
+        }
+    })
+}
 
 function addBarcdMsg(type, msg, info) {
     let param = {
@@ -260,9 +356,9 @@ function addBarcdMsg(type, msg, info) {
         barcdMsg.value.slice(0, 1)
     }
     barcdMsg.value.push(param)
-    if (info == 'error') {
-        barcdStatus.value = false
-    }
+    // if (info == 'error') {
+    //     barcdStatus.value = false
+    // }
 }
 function addPkgNumberMsg(type, msg, info) {
     let param = {
@@ -280,11 +376,6 @@ function addPkgNumberMsg(type, msg, info) {
     }
 }
 
-function transArrayTobarcd(buffer) {
-
-    return buffer
-}
-
 
 
 //清除报错
@@ -294,18 +385,7 @@ const clearError = function () {
     barcdStatus.value = true
 }
 
-//验证操作
-const validBarcd = function (barcd) {
-    hik.validBarcd(barcd).then(res => {
-        let param = JSON.stringify([barcd])
-        ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
-        mesValidMsg.value = 'MES校验成功'
-        addBarcdMsg('mes', res, 'info')
-    }).catch(err => {
-        mesValidMsg.value = 'MES校验失败：' + err
-        addBarcdMsg('mes', res, 'error')
-    })
-}
+
 
 //删除待验证工单
 const deleteValidBarcd = function () {
@@ -371,7 +451,7 @@ onBeforeUnmount(() => {
 })
 // onDeactivated(() => {
 //     ipcRenderer.removeAllListeners('queryReadyBarcdList-reply',
-//      'deleteBarcd-reply', 
+//      'deleteBarcd-reply',
 //      'updateBarcdPkgStatus-reply',
 //      'updateBarcdValidStatus-reply',
 //      'deleteAllBarcd-reply',

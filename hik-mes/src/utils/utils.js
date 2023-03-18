@@ -27,8 +27,27 @@ function getUint8Array(len, setNum) {
     return new Uint8Array(buffer); //创建一个字节数组，从缓存中拿取数据
 }
 
+//转化序列号 去除前两个字节 0的字节去除
+function transBarcd(param){
+    // let array = new Uint8Array([254,  9, 75, 55, 48, 54, 57,
+    //     53, 49, 55, 54,  0,  0,  0,
+    //      0,  0,  0,  0,  0,  0])
+    // param = new Uint8Array([254,  9, 69, 54, 53, 48, 49,
+    //         56, 57, 55, 54,  0,  0,  0,
+    //          0,  0,  0,  0,  0,  0])
+    let result = ''
+    for(let i = 2; i < param.length; i++){
+        if(param[i] == 0){
+            break;
+        }
+        result += String.fromCharCode(param[i])
+    }
+    return result
+}
+
 export default{
     toInt32,
     fullBinary,
-    getView
+    getView,
+    transBarcd
 }

@@ -4,7 +4,7 @@
       @collapse="collapsed = true" @expand="collapsed = false">
       <div style="height: 100%;display: flex; flex-direction: column; justify-content: flex-start;">
         <div class="user">
-          <div class="head_img"></div>
+          <div class="head_img" :style="{backgroundImage: `url(${imgUrl})`}"></div>
           <div>{{ name }}</div>
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
@@ -30,6 +30,8 @@ import route from '@/router'
 import { NIcon } from 'naive-ui'
 import { Color20Filled, Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
+
+const imgUrl = require('@/assets/hik.svg')
 
 const collapsed = ref(false)
 const theme = ref('white')
@@ -64,7 +66,7 @@ var iconMap = new Map([
   ['/SysManager', Settings20Filled],
   ['/DataReport', Library20Filled],
   ['/UserManage', Accessibility20Filled],
-  ['/theme', Color20Filled],
+  // ['/theme', Color20Filled],
   ['/Help', MdHelpCircle],
   ['/log', BookInformation20Filled],
 ])
@@ -125,7 +127,6 @@ watch(updateMenu, (value, old) => {
   margin-bottom: 5px;
   width: 60px;
   height: 22px;
-  background-image: url('/public/Hikvision\ Logo-R.svg');
   background-size: cover;
 }
 

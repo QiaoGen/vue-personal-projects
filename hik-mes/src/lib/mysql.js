@@ -27,6 +27,9 @@ const connect = function () {
     initializeDB()
 }
 
+const disconnect = function(){}
+    
+
 //索引创建语句必须跟在table后， 不可以换行
 const initializeDB = function(){
     log.info('initializeDB')
@@ -52,8 +55,6 @@ const initializeDB = function(){
                    +'     PkgNumber varchar(30) null comment "集成码",'
                    +'     PkgStatus int default 0 null comment "0:未集成 1:已集成",'
                    +'     CreateTime timestamp default CURRENT_TIMESTAMP null,'
-                   +'     constraint barch_list_Barcd_uindex'
-                   +'         unique (Barcd),'
                    +'     constraint barch_list_Id_uindex'
                    +'         unique (Id)'
                    +' )'
@@ -113,9 +114,11 @@ const initializeDB = function(){
 }
 
 const insertBarcd = function(param){
+    log.info('insert Barcd: ' + param)
     return new Promise((resolve,reject) => {
         pool.execute(
-            'insert into `barcd_list`(`Barcd`) values(?)',
+            'insert into `barcd_list`(`Barcd`,`ValidStatus`) values(?,1)',
+            // 'insert into `barcd_list`(`Barcd`,`ValidStatus`) set ?',
             param,
             function (err, results, fields) {
                 if (err) {
@@ -252,24 +255,24 @@ const updateUser = function(param){
     })
 }
 
-const updateBarcdValidStatus = function (param) {
-    let questionSign = '?'
-    for (let i = 1; i < param.length; i++) {
-        questionSign += ',?'
-    }
-    return new Promise((resolve, reject) => {
-        pool.execute(
-            'update `barcd_list` set `ValidStatus` = 1 where `Barcd` in (' + questionSign + ')',
-            param,
-            function (err, results, fields) {
-                if (err) {
-                    reject(err)
-                }
-                resolve(results)
-            }
-        )
-    })
-}
+// const updateBarcdValidStatus = function (param) {
+//     let questionSign = '?'
+//     for (let i = 1; i < param.length; i++) {
+//         questionSign += ',?'
+//     }
+//     return new Promise((resolve, reject) => {
+//         pool.execute(
+//             'update `barcd_list` set `ValidStatus` = 1 where `Barcd` in (' + questionSign + ')',
+//             param,
+//             function (err, results, fields) {
+//                 if (err) {
+//                     reject(err)
+//                 }
+//                 resolve(results)
+//             }
+//         )
+//     })
+// }
 
 //删除工单
 const updateBarcdDeleteStatus = function (param) {
@@ -399,7 +402,7 @@ export default {
     queryByUser,
     updateSysConfig,
     updatePkgNumberList,
-    updateBarcdValidStatus,
+    // updateBarcdValidStatus,
     updateBarcdDeleteStatus,
     updatePkgNumberDeleteStatus,
     updateBarcdPkgStatus,

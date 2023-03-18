@@ -1,5 +1,5 @@
 <template>
-    <div class="father">
+    <div class="father" :style="{backgroundImage: `url(${imgUrl})`}">
         <div class="login_window">
             <div class="big_title">海康包装线登陆</div>
             <n-form ref="formRef" :model="model" :rules="rules">
@@ -27,6 +27,8 @@ import store from '@/store'
 
 //重制menu刷新状态
 store.commit('updateMenu', false)
+
+const imgUrl = require('@/assets/bg.png')
 
 const formRef = ref(null)
 const model = ref({
@@ -100,7 +102,6 @@ onBeforeUnmount(() => {
     align-items: center;
     background-color: white;
     /* background-color: white; */
-    background-image: url('/public/bg.png');
     transition: 1s;
     z-index: 10;
 }
