@@ -8,7 +8,7 @@ const mysql = {
     queryByUser: 'queryByUser',
     queryByUser_reply: 'queryByUser-reply',
     insertBarcd: 'insertBarcd',
-    insertBarcd_reply: 'insertBarcd_reply'
+    insertAlarm: 'insertAlarm'
 }
 
 //plc数据类型
@@ -67,7 +67,7 @@ const alarms = [
         ]
     },
     {
-        machine: '装箱机', amount: 6,color: 'rgb(32,128,240)', content: [
+        machine: '装箱机', amount: 6, color: 'rgb(32,128,240)', content: [
             "装箱机紧急停止按下",
             "装箱机安全门打开",
             "装箱机撑箱上极限报警",
@@ -101,7 +101,7 @@ const alarms = [
             "装箱机与开箱机通讯异常",
         ]
     }, {
-        machine: '投盒机', amount: 4,color:'rgb(240,160,32)', content: [
+        machine: '投盒机', amount: 4, color: 'rgb(240,160,32)', content: [
             "投盒机紧急停止按下",
             "投盒机安全门打开",
             "投盒机伺服反极限",
@@ -119,7 +119,7 @@ const alarms = [
             "投盒机伺服错误",
         ]
     }, {
-        machine: '贴标机', amount: 4,color:'rgb(208,48,80)', content: [
+        machine: '贴标机', amount: 4, color: 'rgb(208,48,80)', content: [
             "贴标机紧急停止按下",
             "贴标机安全门开",
             "贴标机升降伺服正极限报警",
@@ -140,7 +140,7 @@ const alarms = [
 
         ]
     }, {
-        machine: '封箱机', amount: 2, color:'rgb(138, 43, 226)', content: [
+        machine: '封箱机', amount: 2, color: 'rgb(138, 43, 226)', content: [
             "封箱机紧急停止按下报警",
             "封箱机马达过载报警",
             "封箱机无胶带报警",
@@ -152,7 +152,7 @@ const alarms = [
             "封箱机安全门打开报警",
         ]
     }, {
-        machine: '开箱机', amount: 4, color:'rgb(67, 176, 176)', content: [
+        machine: '开箱机', amount: 4, color: 'rgb(67, 176, 176)', content: [
             "开箱机左折侧盖下降检测异常",
             "开箱机右折侧盖上升检测异常",
             "开箱机右折侧盖下降检测异常",
@@ -182,7 +182,7 @@ alarms.forEach(e => {
  * !DB块字符串需要去除前后符号
  */
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const plcCommand = !isDevelopment? {
+const plcCommand = !isDevelopment ? {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 4800, amount: 1, desc: '序列号标识位', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 4801, amount: 1, desc: '序列号错误标识位', name: 'barcdSignError' },
     barcd: { area: areas.DB, dbNumber: 16, start: 0, size: 20, desc: '序列号', name: 'barcd' },//size => byte
@@ -190,13 +190,13 @@ const plcCommand = !isDevelopment? {
     weight: { area: areas.M, wordLen: wordLens.byte, start: 700, amount: 4, desc: '称重数据', name: 'weight' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
-}: {
-    barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply',name: 'barcdSign' },
-    barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply',name: 'barcdSignError' },
+} : {
+    barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
+    barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
     barcd: { area: areas.DB, dbNumber: 1, start: 0, size: 5, desc: '序列号', reply: 'barcd_reply' },//size => b,},//size => byte
-    weightSign: { area: areas.M, wordLen: wordLens.bit, start: 34, amount: 1, desc: '称重标识位', reply: 'weightSign_reply',name: 'weightSign' },
-    weight: { area: areas.M, wordLen: wordLens.byte, start: 20, amount: 4, desc: '称重数据', reply: 'weight_reply',name: 'weight' },
-    pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 489, amount: 1, desc: 'mes集成码错误', reply: '',name: 'pkgNumberError' },
+    weightSign: { area: areas.M, wordLen: wordLens.bit, start: 34, amount: 1, desc: '称重标识位', reply: 'weightSign_reply', name: 'weightSign' },
+    weight: { area: areas.M, wordLen: wordLens.byte, start: 20, amount: 4, desc: '称重数据', reply: 'weight_reply', name: 'weight' },
+    pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 489, amount: 1, desc: 'mes集成码错误', reply: '', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
 }
 

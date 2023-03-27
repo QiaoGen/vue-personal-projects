@@ -58,7 +58,7 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  log.info('plc-msg-invoke:'+ arg)
+  log.info('plc-msg-invoke:' + JSON.stringify(arg))
   switch (arg[0]) {
     case 'read':
       await s7client.read(arg[1]).then(res => {
@@ -71,16 +71,16 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
       })
       break;
     case 'write':
-      await s7client.write(arg[1],arg[2]).then(res => {
+      await s7client.write(arg[1], arg[2]).then(res => {
         result.success = true
         result.value = res
-        event.sender.send(arg[1].reply, result)
+        // event.sender.send(arg[1].reply, result)
       }).catch(err => {
         result.success = false
         result.value = err
-        event.sender.send(arg[1].reply, result)
+        // event.sender.send(arg[1].reply, result)
       })
-    break;
+      break;
   }
   return result
 })
@@ -91,18 +91,18 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  log.info('mysql-msg-invoke:'+ arg)
-  switch(arg[0]){
+  log.info('mysql-msg-invoke:' + arg)
+  switch (arg[0]) {
     case constant.mysql.insertBarcd:
       log.info(JSON.parse(arg[1]))
       await mysql.insertBarcd(JSON.parse(arg[1])).then(res => {
-        result.msg = 'insert '+ arg[1] + ' success'; 
+        result.msg = 'insert ' + arg[1] + ' success';
         result.value = res
       }).catch(err => {
         result.success = false
         result.msg = err
       })
-    break;
+      break;
     case constant.mysql.searchBarcdList:
       await mysql.searchBarcdList(JSON.parse(arg[1])).then(res => {
         result.success = true
@@ -276,6 +276,16 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
         log.error('数据库异常' + err)
       })
       break;
+    case constant.mysql.insertAlarm:
+      mysql.insertAlarm(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
   }
 })
 
@@ -369,8 +379,8 @@ async function createWindow() {
       hash: '/login'
     })
   }
-  
-  win.on('close', function(){
+
+  win.on('close', function () {
     log.info('quit')
     win.destroy()
   })
@@ -382,7 +392,7 @@ app.on('window-all-closed', () => {
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
     app.quit()
-  }else{
+  } else {
     app.quit()
   }
 })

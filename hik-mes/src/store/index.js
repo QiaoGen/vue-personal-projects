@@ -1,9 +1,9 @@
-import {createStore} from 'vuex'
+import { createStore } from 'vuex'
 import persistedState from 'vuex-persistedstate'
 
 const store = createStore({
-    state:{
-        sysConfig:{
+    state: {
+        sysConfig: {
             WorkStation: null,
             MachineId: null
         },
@@ -11,30 +11,31 @@ const store = createStore({
         role: null,
         name: null,
         updateMenu: false,
-        mainMenus : [
+        workFlag: false,//系统开始工作标志
+        mainMenus: [
             {
-                key:"/MainWindow",
+                key: "/MainWindow",
                 label: "主界面",
             },
             {
-                key:"/Alarm",
+                key: "/Alarm",
                 label: "异常告警",
             },
             {
-                key:"/SysManager",
+                key: "/SysManager",
                 label: "系统管理",
                 authorization: [0]
             },
             {
-                key:"/DataReport",
+                key: "/DataReport",
                 label: "数据报告",
             },
             {
-                key:"/UserManage",
+                key: "/UserManage",
                 label: "用户管理",
             },
             {
-                key:"/log",
+                key: "/log",
                 label: "日志",
                 authorization: [0]
             },
@@ -43,32 +44,35 @@ const store = createStore({
             //     label: "主题",
             // },
             {
-                key:"/Help",
+                key: "/Help",
                 label: "帮助",
             },
         ],
     },
-    getters:{
-        
+    getters: {
+
     },
-    mutations:{
-        updateSysConfig(state, sysConfig){
+    mutations: {
+        updateSysConfig(state, sysConfig) {
             state.sysConfig = sysConfig
         },
-        updateTheme(state, theme){
+        updateTheme(state, theme) {
             state.theme = theme
         },
-        updateRole(state, role){
+        updateRole(state, role) {
             state.role = role
         },
-        updateName(state, name){
+        updateName(state, name) {
             state.name = name
         },
-        updateMenu(state, updateMenu){
+        updateMenu(state, updateMenu) {
             state.updateMenu = updateMenu
+        },
+        updateworkFlag(state, workFlag) {
+            state.workFlag = workFlag
         }
     },
-    actions:{
+    actions: {
 
     },
     plugins: [persistedState()]

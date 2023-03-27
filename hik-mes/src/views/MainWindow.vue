@@ -14,8 +14,8 @@
                     <!-- <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button> -->
                 </div>
             </div>
-            <message-window class="msg_window" :msg="barcdMsg"></message-window>
-            {{ msg }}
+            <message-window ref="barcdMsgWindow" class="msg_window"></message-window>
+            <!-- {{ msg }} -->
 
         </div>
         <div class="card" style="width: 60%;">
@@ -63,20 +63,27 @@
                     </n-checkbox-group>
                 </div>
             </div>
-            <message-window class="msg_window" :msg="pkgNumberMsg"></message-window>
-            <n-switch v-model:value="flag"></n-switch>
+            <message-window ref="weightMsgWindow" class="msg_window"></message-window>
+            <!-- <n-switch v-model:value="flag"></n-switch> -->
         </div>
     </div>
 </template>
 
 <script setup>
 import MessageWindow from '@/components/home/MessageWindow.vue'
-import { reactive, ref, onDeactivated, onBeforeUnmount } from 'vue'
+import { ref, onDeactivated, onBeforeUnmount, getCurrentInstance, computed } from 'vue'
 import { ipcRenderer } from 'electron'
+import store from '@/store'
 import hik from '@/lib/hik'
 import constant from '@/lib/constant'
 import utils from '@/utils/utils'
 
+const { proxy: tthis } = getCurrentInstance()
+
+const workFlag = computed(() => {
+    return store.state.workFlag
+})
+console.log(workFlag.value)
 
 //待验证序列号
 const barcd = ref(null)
@@ -86,10 +93,6 @@ const mesValidMsg = ref(null)//mes校验结果
 const barcdStatus = ref(true)
 const pkgNumberStatus = ref(false)
 const printStatus = ref(false)
-//存储序列号数据交互信息
-// const barcdMsg = reactive([{ type: 'plc', msg: 'read plc', info: 'info' }, { type: 'mes', msg: 'valid barcd', info: 'info' }, { type: 'plc', msg: 'plc read failed ', info: 'error' }])
-const barcdMsg = ref([])
-const pkgNumberMsg = ref([])
 
 const readyValidBarcd = ref([])//多选
 const readyBarcdList = ref([])
@@ -120,6 +123,9 @@ const selectAllReadyValidBarcd = function (e) {
 
 //获取已验证序列号
 const catchValidedBarcd = setInterval(() => {
+    if (!workFlag.value) {
+        return
+    }
     getReadyBarcdList()
 }, 2000);
 
@@ -231,6 +237,9 @@ const generatePkgNumber = function () {
  * 
  */
 const catchBarcd = setInterval(() => {
+    if (!workFlag.value) {
+        return
+    }
     catchBarcdFromPLC()
     getWeight()
 }, 1000)
@@ -241,7 +250,7 @@ const catchBarcdFromPLC = function () {
     }
     addBarcdMsg('plc', '读取Barcd标识位', 'info')
     ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcdSign).then((result) => {
-        console.log(result)
+        // console.log(result)
         if (!result.success) {
             // console.error('msg:',barcdMsg.value)
             addBarcdMsg('plc', result.value, 'error')
@@ -251,7 +260,7 @@ const catchBarcdFromPLC = function () {
         if (result.value[0] == 1) {
             addBarcdMsg('plc', '读取Barcd序列号', 'info')
             ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcd).then(res => {
-                console.log(res)
+                // console.log(res)
                 let barcdTemp = utils.transBarcd(res.value)
                 if (barcdTemp.length == 0 || barcdTemp == null) {
                     addBarcdMsg('plc', '序列号为空', 'error')
@@ -269,7 +278,7 @@ const catchBarcdFromPLC = function () {
 
 const addBarcdToDB = function (barcdTemp) {
     ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify([barcdTemp, null, null, null])).then(res => {
-        console.log(res)
+        // console.log(res)
         if (res.success) {
             if (res.value.length != 0) {
                 let repeatFlag = false
@@ -282,7 +291,7 @@ const addBarcdToDB = function (barcdTemp) {
                     plcBarcdSignError()
                     resetBarcdSign()
                 }
-            }else{
+            } else {
                 validBarcd(barcdTemp)
             }
         }
@@ -306,7 +315,7 @@ const addBarcdToDB = function (barcdTemp) {
 //验证操作
 const validBarcd = function (barcd) {
     hik.validBarcd(barcd).then(res => {
-       
+
         // ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
         mesValidMsg.value = 'MES校验成功'
         ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd])).then(addRes => {
@@ -352,10 +361,7 @@ function addBarcdMsg(type, msg, info) {
         msg,
         info
     }
-    if (barcdMsg.value.length >= 50) {
-        barcdMsg.value.slice(0, 1)
-    }
-    barcdMsg.value.push(param)
+    tthis.$refs.barcdMsgWindow.sendMessage(param)
     // if (info == 'error') {
     //     barcdStatus.value = false
     // }
@@ -366,10 +372,7 @@ function addPkgNumberMsg(type, msg, info) {
         msg,
         info
     }
-    if (pkgNumberMsg.value.length >= 50) {
-        pkgNumberMsg.value.slice(0, 1)
-    }
-    pkgNumberMsg.value.push(param)
+    tthis.$refs.weightMsgWindow.sendMessage(param)
     if (info == 'error') {
         pkgNumberStatus.value = false
         printStatus.value = false
@@ -569,7 +572,7 @@ onBeforeUnmount(() => {
 
 .msg_window {
     margin: 0 10px;
-    flex: 1;
-    overflow-y: scroll;
+    /* flex: 1; */
+    /* overflow-y: scroll; */
 }
 </style>

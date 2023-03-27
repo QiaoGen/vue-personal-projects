@@ -6,8 +6,11 @@ var plcConnetStatus = false //plc连接状态
 
 //总read
 const read = function (param) {
-    log.info('plc_param:' + JSON.stringify(param))
+    // log.info('plc_param:' + JSON.stringify(param))
     return new Promise((reslove, reject) => {
+        if (!plcConnetStatus) {
+            reject('plc stop')
+        }
         switch (param.area) {
             case constant.areas.M:
                 switch (param.wordLen) {
@@ -15,6 +18,7 @@ const read = function (param) {
                         ReadArea(s7client.S7AreaMK, 1, param.start, param.amount, s7client.S7WLBit).then(res => {
                             reslove(res)
                         }).catch(err => {
+                            errorResult(err)
                             reject(err)
                         })
                         break;
@@ -22,6 +26,7 @@ const read = function (param) {
                         MBRead(param.start, param.amount).then(res => {
                             reslove(res)
                         }).catch(err => {
+                            errorResult(err)
                             reject(err)
                         })
                         break;
@@ -31,6 +36,7 @@ const read = function (param) {
                 DBRead(param.dbNumber, param.start, param.size).then(res => {
                     reslove(res)
                 }).catch(err => {
+                    errorResult(err)
                     reject(err)
                 })
                 break;
@@ -40,7 +46,7 @@ const read = function (param) {
 
 //总write
 const write = function (param, buffer) {
-    log.info('plc_param_write:' + JSON.stringify(param) + buffer)
+    // log.info('plc_param_write:' + JSON.stringify(param) + buffer)
     return new Promise((reslove, reject) => {
         switch (param.area) {
             case constant.areas.M:
@@ -49,6 +55,7 @@ const write = function (param, buffer) {
                         WriteArea(s7client.S7AreaMK, 1, param.start, param.amount, s7client.S7WLBit, buffer).then(res => {
                             reslove(res)
                         }).catch(err => {
+                            errorResult(err)
                             reject(err)
                         })
                         break;
@@ -56,6 +63,7 @@ const write = function (param, buffer) {
                         MBWrite(param.start, param.amount, buffer).then(res => {
                             reslove(res)
                         }).catch(err => {
+                            errorResult(err)
                             reject(err)
                         })
                         break;
@@ -72,12 +80,12 @@ const ConnectTo = function (ip) {
                 log.error(' >> PLC connection failed. Code #' + err + ' - ' + s7client.ErrorText(err))
                 plcConnetStatus = false
                 reject(false)
-            }
-            else {
+            } else {
                 log.info(' >> PLC connect successfully')
                 plcConnetStatus = true
                 reslove(true)
             }
+
         })
     })
 }
@@ -85,9 +93,11 @@ const ConnectTo = function (ip) {
 const MBRead = function (start, size) {
     return new Promise((reslove, reject) => {
         s7client.MBRead(start, size, function (err, res) {
-            if (err)
+            if (err) {
                 reject(' >> MBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err))
-            reslove(res)
+            } else {
+                reslove(res)
+            }
         })
     })
 }
@@ -96,9 +106,11 @@ const MBWrite = function (start, size, buffer) {
     return new Promise((reslove, reject) => {
         // s7client.MBWrite(1, 1, Buffer.from([5]) ,function(err,res){
         s7client.MBWrite(start, size, buffer, function (err, res) {
-            if (err)
+            if (err) {
                 reject(' >> MBWrite failed. Code #' + err + ' - ' + s7client.ErrorText(err))
-            reslove(res)
+            } else {
+                reslove(res)
+            }
         })
     })
 }
@@ -108,10 +120,10 @@ const WriteArea = function (area, dbNumber, start, amount, wordLen, buffer) {
         // s7client.WriteArea(s7client.S7AreaMK, 1, 4800, 1, s7client.S7WLBit, Buffer.from([1]), function (err, res) {
         s7client.WriteArea(area, dbNumber, start, amount, wordLen, buffer, function (err, res) {
             if (err) {
-                log.error(' >> WriteArea failed. Code #' + err + ' - ' + s7client.ErrorText(err))
                 reject(' >> WriteArea failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+            } else {
+                reslove(res)
             }
-            reslove(res)
         })
     })
 }
@@ -121,11 +133,11 @@ const ReadArea = function (area, dbNumber, start, amount, wordLen) {
         // s7client.ReadArea(s7client.S7AreaMK, 1, 100, 1, s7client.S7WLBit, function (err, res) {
         s7client.ReadArea(area, dbNumber, start, amount, wordLen, function (err, res) {
             if (err) {
-                log.error(' >> ReadArea failed. Code #' + err + ' - ' + s7client.ErrorText(err))
                 reject(' >> ReadArea failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+            } else {
+                reslove(res)
             }
-            log.info(res)
-            reslove(res)
+
         })
     })
 }
@@ -134,12 +146,21 @@ const DBRead = function (dbNumber, start, size) {
     return new Promise((reslove, reject) => {
         s7client.DBRead(dbNumber, start, size, function (err, res) {
             if (err) {
-                log.error(' >> DBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err))
                 reject(' >> DBRead failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+            } else {
+                reslove(res)
             }
-            reslove(res)
         })
     })
+}
+
+//Code #599878 -  ISO : An error occurred during send TCP : Connection reset by peer
+const errorResult = function (err) {
+    log.error('plc error:' + err)
+    if (err.includes('#599878')) {
+        log.error('reconnect PLC')
+        ConnectTo()
+    }
 }
 
 export default {

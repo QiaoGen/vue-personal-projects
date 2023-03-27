@@ -4,7 +4,7 @@
       @collapse="collapsed = true" @expand="collapsed = false">
       <div style="height: 100%;display: flex; flex-direction: column; justify-content: flex-start;">
         <div class="user">
-          <div class="head_img" :style="{backgroundImage: `url(${imgUrl})`}"></div>
+          <div class="head_img" :style="{ backgroundImage: `url(${imgUrl})` }"></div>
           <div>{{ name }}</div>
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
@@ -28,8 +28,9 @@ import store from '@/store'
 import { ref, h, toRaw, computed, watch } from "vue";
 import route from '@/router'
 import { NIcon } from 'naive-ui'
-import { Color20Filled, Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
+import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
+import { useRoute } from "vue-router";
 
 const imgUrl = require('@/assets/hik.svg')
 
@@ -97,17 +98,22 @@ const menuOptions = ref(loadMenus())
 const activeKey = ref(route.currentRoute._value.fullPath)
 
 const exit = function () {
-  // store.commit('updateMenu', false)
+  store.commit('updateMenu', false)
+  store.commit('updateworkFlag', true)
   route.replace('/login')
 }
 
 // watch(updateMenu.value, (old, new) => { },{})
 watch(updateMenu, (value, old) => {
   console.log('变化----', value, old)
-  if(value === true){
+  if (value === true) {
     menuOptions.value = loadMenus()
   }
 }, { immediate: true })
+
+watch(() => route.currentRoute._value.fullPath, (newPath, oldPath) => {
+  console.log(newPath)
+}, { immediate: true });
 
 
 </script>
