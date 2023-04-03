@@ -77,6 +77,27 @@ import store from '@/store'
 import hik from '@/lib/hik'
 import constant from '@/lib/constant'
 import utils from '@/utils/utils'
+import soapClient from '@/lib/soapClient'
+// soapClient.sendPkgNumber([{ "Barcd": "Q01801180" },
+// { "Barcd": "Q01801181" },
+// { "Barcd": "Q01801182" },
+// { "Barcd": "Q01801183" },
+// { "Barcd": "Q01801184" },
+// { "Barcd": "Q01801185" },
+// { "Barcd": "Q01801186" },
+// { "Barcd": "Q01801187" },
+// { "Barcd": "Q01801188" },
+// {
+//     "Barcd": "Q01801189",
+//     "PkgInfo": {
+//         "Weigth": 28.1
+//     }
+// }
+// ]).then(res => {
+//     console.log(res)
+// }).catch(err => {
+//     console.error(err)
+// })
 
 const { proxy: tthis } = getCurrentInstance()
 
@@ -149,11 +170,12 @@ const getWeight = function () {
             return
         }
         ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.weight).then(weightResult => {
-            console.log(weightResult)
+            // console.log(weightResult)
             if (weightResult.success) {
                 let weightTemp = utils.getView(weightResult.value).getUint32()
                 weight.value = weightTemp / 1000
-                if (readyBarcdList.value.length == 5 && weight.value != null) {
+                //是否满100箱数据
+                if (readyBarcdList.value.length >= 100 && weight.value != null) {
                     generatePkgNumber()
                 }
                 addPkgNumberMsg('plc', '读取称重数据' + weightTemp + 'g', 'info')
@@ -182,38 +204,46 @@ function getUint8Array(len, setNum) {
 }
 
 const flag = ref(true)
-//生成集成码
+//生成集成码 截取前100条数据
 const generatePkgNumber = function () {
     let param = []
     for (let i = 0; i < readyBarcdList.value.length - 1; i++) {
         param.push({ Barcd: readyBarcdList.value[i] })
     }
     param.push({ Barcd: readyBarcdList.value[readyBarcdList.value.length - 1], PkgInfo: { Weigth: weight.value } })
-    hik.getPkgNumber(param).then(res => {
-        // if (res.ErrCode === 700022) {
-        //     resetWeightSignError()
-        //     resetWeightSign()
-        //     window.$message.warning('mes打印服务失效')
-        //     return
-        // }
-        // pkgNumber.value = res.Data.PkgNumber
-        // //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
-        // let param = []
-        // param.push(pkgNumber.value)
-        // readyBarcdList.value.forEach(e => {
-        //     param.push(e)
-        // })
-        // param.push(pkgNumber.value)
-        // ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
-        // addPkgNumberMsg('mes', '获取集成码' + pkgNumber.value, 'info')
-        // resetWeightSign()
-
-        if (flag.value) {
-            resetWeightSign()
-        } else {
+    // hik.getPkgNumber(param).then(res => {
+    soapClient.sendPkgNumber(param).then(res => {
+        if (res.ErrCode === '700022') {
             resetWeightSignError()
             resetWeightSign()
+            window.$message.warning('mes打印服务失效')
+            return
+        } else if (res.ErrCode === '-1') {//重量校验异常
+            resetWeightSignError()
+            resetWeightSign()
+            window.$message.warning(res.ErrMsg)
+            return
         }
+        pkgNumber.value = res.Data.PkgNumber
+        //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
+        let param = []
+        param.push(pkgNumber.value)
+        readyBarcdList.value.forEach(e => {
+            param.push(e)
+        })
+        param.push(pkgNumber.value)
+        ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
+        addPkgNumberMsg('mes', '获取集成码' + pkgNumber.value, 'info')
+        resetWeightSign()
+
+
+
+        // if (flag.value) {
+        //     resetWeightSign()
+        // } else {
+        //     resetWeightSignError()
+        //     resetWeightSign()
+        // }
 
     }).catch(err => {
         resetWeightSignError()

@@ -4,6 +4,7 @@
 ```
 node16.13.0
 python3 环境
+cmd管理员 npm install --global --production windows-build-tools
 npm config set python "path to python" 指定npm python版本
 node-snap7指定python2.7，但是node-gyp报错必须使用python3
 ```

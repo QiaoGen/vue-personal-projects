@@ -5,15 +5,13 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import log from '@/utils/log.js'
 import logReader from '@/utils/logReader'
-import s7client from '@/lib/s7Client'
+import s7client from '@/lib/s7client'
 import tcpp from 'tcp-ping'
 import constant from '@/lib/constant'
 import mysql from '@/lib/mysql'
 import electron from 'electron'
 
 mysql.connect()
-
-
 
 
 // log.initialize({ preload: true });
@@ -25,7 +23,7 @@ const connectPLC = function () {
   }).catch(err => {
     PLCInfo.plcConnetStatus = err
   })
-  log.info(1)
+  // log.info(1)
 }
 connectPLC()
 
@@ -61,14 +59,28 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
   log.info('plc-msg-invoke:' + JSON.stringify(arg))
   switch (arg[0]) {
     case 'read':
-      await s7client.read(arg[1]).then(res => {
-        result.success = true
-        result.value = res
-        log.info(result)
-      }).catch(err => {
+      try {
+        await s7client.read(arg[1]).then(res => {
+          result.success = true
+          result.value = res
+          log.info(result)
+        }).catch(err => {
+          result.success = false
+          result.value = err
+        })
+      } catch (err) {
+        log.error(err)
         result.success = false
         result.value = err
-      })
+      }
+      // await s7client.read(arg[1]).then(res => {
+      //   result.success = true
+      //   result.value = res
+      //   log.info(result)
+      // }).catch(err => {
+      //   result.success = false
+      //   result.value = err
+      // })
       break;
     case 'write':
       await s7client.write(arg[1], arg[2]).then(res => {
@@ -81,6 +93,9 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
         // event.sender.send(arg[1].reply, result)
       })
       break;
+  }
+  if (!result.success) {
+    log.info('plc try to reconnect times: ' + s7client.tryTimes)
   }
   return result
 })
@@ -361,6 +376,7 @@ async function createWindow() {
     height: 600,
     webPreferences: {
       autoHideMenuBar: true,
+      webSecurity: false,
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,

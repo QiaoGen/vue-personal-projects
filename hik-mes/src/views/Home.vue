@@ -33,7 +33,11 @@ import constant from '@/lib/constant'
 import store from '@/store'
 import utils from '@/utils/utils';
 import dayjs from 'dayjs'
+
+
+
 const msgNum = ref(0)
+
 
 const workFlag = computed(() => {
   return store.state.workFlag
@@ -119,7 +123,7 @@ const addAlarm = function (index, desc) {
   if (!lastScanIndex.includes(index)) {
     desc.time = dayjs().format('YYYY-MM-DD HH:mm:ss')
     alarms.value.unshift(desc)
-    console.log(desc)
+    // console.log(desc)
     // ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertAlarm, JSON.stringify([desc.content])).then(res)
     ipcRenderer.send('mysql-msg', constant.mysql.insertAlarm, JSON.stringify([desc.content]))
   }
@@ -155,11 +159,9 @@ const catchAlarm = setInterval(() => {
     } else {
       // window.$message.error('获取PLC告警信息失败，请检查线路')
     }
-  }).catch(err => {
-    log.error(err)
   })
 }, 1000)
-//-------
+// -------
 
 
 // 移除监听器

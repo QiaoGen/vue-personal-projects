@@ -3,14 +3,15 @@ import constant from '@/lib/constant'
 var snap7 = require('node-snap7');
 var s7client = new snap7.S7Client();
 var plcConnetStatus = false //plc连接状态
+var tryTimes = 0 //重试次数
 
 //总read
 const read = function (param) {
     // log.info('plc_param:' + JSON.stringify(param))
     return new Promise((reslove, reject) => {
-        if (!plcConnetStatus) {
-            reject('plc stop')
-        }
+        // if (!plcConnetStatus) {
+        //     reject('plc disconnect')
+        // }
         switch (param.area) {
             case constant.areas.M:
                 switch (param.wordLen) {
@@ -75,18 +76,24 @@ const write = function (param, buffer) {
 
 const ConnectTo = function (ip) {
     return new Promise((reslove, reject) => {
-        s7client.ConnectTo(ip, 0, 1, function (err) {
-            if (err) {
-                log.error(' >> PLC connection failed. Code #' + err + ' - ' + s7client.ErrorText(err))
-                plcConnetStatus = false
-                reject(false)
-            } else {
-                log.info(' >> PLC connect successfully')
-                plcConnetStatus = true
-                reslove(true)
-            }
+        try {
+            s7client.ConnectTo(ip, 0, 1, function (err) {
+                if (err) {
+                    log.error(' >> PLC connection failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+                    plcConnetStatus = false
+                    reject(false)
+                } else {
+                    log.info(' >> PLC connect successfully')
+                    plcConnetStatus = true
+                    reslove(true)
+                }
+            })
+        } catch (error) {
+            log.error(' >> catch PLC error connection failed. Code #' + err + ' - ' + s7client.ErrorText(err))
+            plcConnetStatus = false
+            reject(false)
+        }
 
-        })
     })
 }
 
@@ -155,16 +162,20 @@ const DBRead = function (dbNumber, start, size) {
 }
 
 //Code #599878 -  ISO : An error occurred during send TCP : Connection reset by peer
+//Code #589884 -  ISO : An error occurred during send TCP : Connection timed out
 const errorResult = function (err) {
-    log.error('plc error:' + err)
-    if (err.includes('#599878')) {
-        log.error('reconnect PLC')
-        ConnectTo()
+    plcConnetStatus = false
+    log.error('plc error---:' + err)
+    if (err.includes('#599878') || err.includes('#589884') || err.includes('#655420') || err.includes('#589856')) {
+        log.error('try reconnect PLC')
+        tryTimes = tryTimes + 1
+        // ConnectTo()
     }
 }
 
 export default {
     plcConnetStatus,
+    tryTimes,
     ConnectTo,
     read,
     write,

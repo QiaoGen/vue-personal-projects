@@ -180,7 +180,8 @@ const queryBarcdList = function () {
 const queryReadyBarcdList = function () {
     return new Promise((resolve, reject) => {
         pool.query(
-            'SELECT * FROM `barcd_list` where `Deleted` = 0 and `PkgStatus` = 0 and `ValidStatus` = 1 order by `CreateTime` limit 100',
+            // 'SELECT * FROM `barcd_list` where `Deleted` = 0 and `PkgStatus` = 0 and `ValidStatus` = 1 order by `CreateTime` limit 100',
+            'SELECT * FROM `barcd_list` where `Deleted` = 0 and `PkgStatus` = 0 and `ValidStatus` = 1 order by `CreateTime`',
             function (err, results, fields) {
                 // log.info(results)
                 if (err) {

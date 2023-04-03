@@ -1,6 +1,8 @@
 <template>
   <n-layout has-sider class="menu">
-    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed" show-trigger
+    <!-- <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed" show-trigger
+      @collapse="collapsed = true" @expand="collapsed = false"> -->
+    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed"
       @collapse="collapsed = true" @expand="collapsed = false">
       <div style="height: 100%;display: flex; flex-direction: column; justify-content: flex-start;">
         <div class="user">
@@ -9,6 +11,10 @@
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
           @update:value="selectMenu" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22" />
+        <!-- <n-button type="error" @click="reConnectPLC" style="margin-right: 10px;">重连PLC</n-button> -->
+        <!-- <div class="tip">
+          <n-button dashed type="error">设备异常{{}}</n-button>
+        </div> -->
         <div class="exit">
           <n-tooltip trigger="hover">
             <template #trigger>
@@ -31,6 +37,13 @@ import { NIcon } from 'naive-ui'
 import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
 import { useRoute } from "vue-router";
+import { ipcRenderer } from 'electron'
+
+const reConnectPLC = function () {
+  ipcRenderer.send('plc-msg', 'reconnectPLC')
+  // getPLCInfo()
+}
+
 
 const imgUrl = require('@/assets/hik.svg')
 
@@ -149,5 +162,16 @@ watch(() => route.currentRoute._value.fullPath, (newPath, oldPath) => {
 
 .exit>i {
   cursor: pointer;
+}
+
+.tip {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.tip>button {
+  width: 90%;
 }
 </style>

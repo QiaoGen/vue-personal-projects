@@ -5,8 +5,8 @@ import store from '@/store'
 const SCAN_BARCD_SUBMIT = 'SCAN_BARCD_SUBMIT' //获取集成码
 const SCAN_BARCD_CHECK = 'SCAN_BARCD_CHECK' //序列号验证
 //序列号验证
-const validBarcd = function(Barcd){
-    return new Promise((resolve,reject) => {
+const validBarcd = function (Barcd) {
+    return new Promise((resolve, reject) => {
         // require.post({
         //     Id: "1234568",
         //     ServerName: "SCAN_BARCD_CHECK",
@@ -52,8 +52,8 @@ const validBarcd = function(Barcd){
 // 注意：
 // ErrCode 700022 包装箱号生成成功 但打印服务不存在，打印失败
 // 不能将成功的判定条件定为 ErrCode =0，判定成功逻辑为 PkgNumber 有内容且以@开头
-const getPkgNumber = function(param){
-    return new Promise((resolve,reject) =>{
+const getPkgNumber = function (param) {
+    return new Promise((resolve, reject) => {
         resolve('pkg success')
         // let requestBody = {
         //     Id: "1234567",
@@ -80,25 +80,44 @@ const getPkgNumber = function(param){
 }
 
 // 打印标签
-const printLabel = function(){
-    
+const printLabel = function () {
+
 }
 
-var client
+var client = net.Socket()
 // 连接打印机服务
-const connectPrintServer = function(){
-    client = net.Socket()
-    client.connect(8000, '127.0.0.1',function(){
-        
+const connectPrintServer = function () {
+    client.connect(9998, '127.0.0.1', function () {
+
     })
 }
 
-/* 监听end事件 */ 
-// client.on("end", function () {
-//     console.log("data end");
-// })
+var sendToPrint = function (param) {
+    let cc = {
+        "Type": "OnlinePackagePrint",
+        "Data": {
+            "Aufnr": "%s", //订单号
+            "PkgNumber": "%s", //集成码
+            "TemplateType": "%s" //标签模板，默认为空
+        }
+    }
+    client.write(param)
+}
 
-export default{
+/* 监听服务器传来的data数据 */
+client.on("data", function (data) {
+    console.log("the data of server is " + data.toString());
+})
+
+/* 监听end事件 */
+client.on("end", function () {
+    console.log("data end");
+})
+
+
+
+export default {
     validBarcd,
-    getPkgNumber
+    getPkgNumber,
+    connectPrintServer
 }
