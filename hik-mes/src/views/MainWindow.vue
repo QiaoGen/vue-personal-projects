@@ -180,6 +180,7 @@ const getWeight = function () {
                 }
                 addPkgNumberMsg('plc', '读取称重数据' + weightTemp + 'g', 'info')
                 //称重标志位归位
+                resetWeightSign()
             }
         })
     })
@@ -207,20 +208,24 @@ const flag = ref(true)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
     let param = []
-    for (let i = 0; i < readyBarcdList.value.length - 1; i++) {
+    let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
+    if (tempList.length > 100) {
+        tempList = tempList.slice(0, 100)
+    }
+    for (let i = 0; i < tempList.length - 1; i++) {
         param.push({ Barcd: readyBarcdList.value[i] })
     }
-    param.push({ Barcd: readyBarcdList.value[readyBarcdList.value.length - 1], PkgInfo: { Weigth: weight.value } })
+    param.push({ Barcd: tempList[tempList.length - 1], PkgInfo: { Weigth: weight.value } })
     // hik.getPkgNumber(param).then(res => {
     soapClient.sendPkgNumber(param).then(res => {
         if (res.ErrCode === '700022') {
             resetWeightSignError()
-            resetWeightSign()
+            // resetWeightSign()
             window.$message.warning('mes打印服务失效')
             return
         } else if (res.ErrCode === '-1') {//重量校验异常
             resetWeightSignError()
-            resetWeightSign()
+            // resetWeightSign()
             window.$message.warning(res.ErrMsg)
             return
         }
@@ -228,13 +233,13 @@ const generatePkgNumber = function () {
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
         let param = []
         param.push(pkgNumber.value)
-        readyBarcdList.value.forEach(e => {
+        tempList.forEach(e => {
             param.push(e)
         })
         param.push(pkgNumber.value)
         ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
         addPkgNumberMsg('mes', '获取集成码' + pkgNumber.value, 'info')
-        resetWeightSign()
+        // resetWeightSign()
 
 
 
