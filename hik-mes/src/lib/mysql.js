@@ -55,6 +55,7 @@ const initializeDB = function () {
                     + '     PkgNumber varchar(30) null comment "集成码",'
                     + '     PkgStatus int default 0 null comment "0:未集成 1:已集成",'
                     + '     CreateTime timestamp default CURRENT_TIMESTAMP null,'
+                    + '     Aufnr varchar(30) null comment "订单号",'
                     + '     constraint barch_list_Id_uindex'
                     + '         unique (Id)'
                     + ' )'
@@ -117,7 +118,7 @@ const insertBarcd = function (param) {
     log.info('insert Barcd: ' + param)
     return new Promise((resolve, reject) => {
         pool.execute(
-            'insert into `barcd_list`(`Barcd`,`ValidStatus`) values(?,1)',
+            'insert into `barcd_list`(`Barcd`,`ValidStatus`, `Aufnr`) values(?,1,?)',
             // 'insert into `barcd_list`(`Barcd`,`ValidStatus`) set ?',
             param,
             function (err, results, fields) {

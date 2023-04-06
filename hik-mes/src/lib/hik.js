@@ -1,33 +1,7 @@
 import require from "@/lib/require";
 import net from 'net'
 import store from '@/store'
-
-const SCAN_BARCD_SUBMIT = 'SCAN_BARCD_SUBMIT' //获取集成码
-const SCAN_BARCD_CHECK = 'SCAN_BARCD_CHECK' //序列号验证
-//序列号验证
-const validBarcd = function (Barcd) {
-    return new Promise((resolve, reject) => {
-        // require.post({
-        //     Id: "1234568",
-        //     ServerName: "SCAN_BARCD_CHECK",
-        //     WorkStation: store.state.sysConfig.WorkStation,
-        //     MachineId: store.state.sysConfig.MachineId,
-        //     Data: {
-        //         Barcd,
-        //         Aufnr:"YES"
-        //     }
-        // }).then(res => {
-        //     resolve(res)
-        // }).catch(err => {
-        //     let error = {
-        //         value: Barcd,
-        //         msg: err
-        //     }
-        //     reject(error)
-        // })
-        resolve('ok')
-    })
-}
+import { ipcRenderer } from "electron";
 
 // 获取集成码 接口不支持尾箱、非满箱
 // Id 消息编号，可以为 guid
@@ -79,45 +53,42 @@ const getPkgNumber = function (param) {
     })
 }
 
-// 打印标签
-const printLabel = function () {
-
-}
-
 var client = net.Socket()
 // 连接打印机服务
 const connectPrintServer = function () {
-    client.connect(9998, '127.0.0.1', function () {
-
+    client.connect(store.state.sysConfig.port, store.state.sysConfig.ip, function () {
+        loggerIPC('connect print TCP Server successfully')
     })
 }
 
-var sendToPrint = function (param) {
-    let cc = {
+var sendToPrint = function (Aufnr, PkgNumber) {
+    let param = {
         "Type": "OnlinePackagePrint",
         "Data": {
-            "Aufnr": "%s", //订单号
-            "PkgNumber": "%s", //集成码
-            "TemplateType": "%s" //标签模板，默认为空
+            "Aufnr": Aufnr, //订单号
+            "PkgNumber": PkgNumber, //集成码
         }
     }
-    client.write(param)
+    let arr = [Buffer.from([2]), Buffer.from(param), Buffer.from([3])]
+    let paramArray = Buffer.concat(arr)
+    client.write(paramArray)
 }
 
 /* 监听服务器传来的data数据 */
 client.on("data", function (data) {
-    console.log("the data of server is " + data.toString());
+    loggerIPC("the data of server is " + data.toString());
 })
 
 /* 监听end事件 */
 client.on("end", function () {
-    console.log("data end");
+    loggerIPC("disconect from Server");
 })
 
-
+function loggerIPC(str) {
+    ipcRenderer.send('log-msg-info', str)
+}
 
 export default {
-    validBarcd,
-    getPkgNumber,
-    connectPrintServer
+    connectPrintServer,
+    sendToPrint
 }

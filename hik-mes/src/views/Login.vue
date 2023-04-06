@@ -67,12 +67,10 @@ const handleValidateButtonClick = function (e) {
 }
 
 const login = function () {
-
-
     let param = [model.value.username, model.value.password]
     ipcRenderer.send('mysql-msg', constant.mysql.queryByUser, JSON.stringify(param))
-
 }
+
 ipcRenderer.on(constant.mysql.queryByUser_reply, function (event, arg) {
     if (arg.success && arg.msg.length == 1) {
         store.commit('updateRole', arg.msg[0].role)
@@ -85,6 +83,22 @@ ipcRenderer.on(constant.mysql.queryByUser_reply, function (event, arg) {
         model.value = { username: null, password: null }
     }
 })
+
+//获取系统信息
+const getSysInfo = function () {
+    ipcRenderer.send('mysql-msg', 'querySysConfig')
+}
+ipcRenderer.once('querySysConfig-reply', function (event, arg) {
+    let sysConfig = JSON.parse(arg)[0]
+    let sysInfo = {
+        WorkStation: sysConfig.WorkStation,
+        MachineId: sysConfig.MachineId,
+        ip: sysConfig.PrintIP,
+        port: sysConfig.PrintPort
+    }
+    store.commit('updateSysConfig', sysInfo)
+})
+getSysInfo()
 
 onBeforeUnmount(() => {
     ipcRenderer.removeAllListeners(constant.mysql.queryByUser_reply)

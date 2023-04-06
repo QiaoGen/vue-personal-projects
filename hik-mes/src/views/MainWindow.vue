@@ -11,7 +11,7 @@
                 <div style="display: flex;align-items: center;margin-bottom: 10px;">
                     <div>校验标志</div>
                     <div :class="barcdStatus ? 'point_green' : 'point'"></div>
-                    <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button>
+                    <!-- <n-button @click="clearError" v-if="!barcdStatus" style="margin-left: 10px;" type="error">复位</n-button> -->
                 </div>
             </div>
             <message-window ref="barcdMsgWindow" class="msg_window"></message-window>
@@ -78,33 +78,16 @@ import hik from '@/lib/hik'
 import constant from '@/lib/constant'
 import utils from '@/utils/utils'
 import soapClient from '@/lib/soapClient'
-// soapClient.sendPkgNumber([{ "Barcd": "Q01801180" },
-// { "Barcd": "Q01801181" },
-// { "Barcd": "Q01801182" },
-// { "Barcd": "Q01801183" },
-// { "Barcd": "Q01801184" },
-// { "Barcd": "Q01801185" },
-// { "Barcd": "Q01801186" },
-// { "Barcd": "Q01801187" },
-// { "Barcd": "Q01801188" },
-// {
-//     "Barcd": "Q01801189",
-//     "PkgInfo": {
-//         "Weigth": 28.1
-//     }
-// }
-// ]).then(res => {
-//     console.log(res)
-// }).catch(err => {
-//     console.error(err)
-// })
+
+//连接打印机服务
+hik.connectPrintServer()
 
 const { proxy: tthis } = getCurrentInstance()
 
 const workFlag = computed(() => {
     return store.state.workFlag
 })
-console.log(workFlag.value)
+// console.log(workFlag.value)
 
 //待验证序列号
 const barcd = ref(null)
@@ -218,17 +201,6 @@ const generatePkgNumber = function () {
     param.push({ Barcd: tempList[tempList.length - 1], PkgInfo: { Weigth: weight.value } })
     // hik.getPkgNumber(param).then(res => {
     soapClient.sendPkgNumber(param).then(res => {
-        if (res.ErrCode === '700022') {
-            resetWeightSignError()
-            // resetWeightSign()
-            window.$message.warning('mes打印服务失效')
-            return
-        } else if (res.ErrCode === '-1') {//重量校验异常
-            resetWeightSignError()
-            // resetWeightSign()
-            window.$message.warning(res.ErrMsg)
-            return
-        }
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
         let param = []
@@ -238,24 +210,21 @@ const generatePkgNumber = function () {
         })
         param.push(pkgNumber.value)
         ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
-        addPkgNumberMsg('mes', '获取集成码' + pkgNumber.value, 'info')
+        addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
+        addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')
+        readyToPrint(tempList[0].Aufnr, PkgNumber)
         // resetWeightSign()
-
-
-
-        // if (flag.value) {
-        //     resetWeightSign()
-        // } else {
-        //     resetWeightSignError()
-        //     resetWeightSign()
-        // }
-
     }).catch(err => {
+        addPkgNumberMsg('mes', '获取集成码失败:' + err.ErrMsg, 'error')
         resetWeightSignError()
         resetWeightSign()
         console.error(err)
-        window.$message.error('生成集成码失败')
+        window.$message.error(err.ErrMsg)
     })
+}
+
+const readyToPrint = function (Aufnr, PkgNumber) {
+    hik.sendToPrint(Aufnr, PkgNumber)
 }
 
 // console.log(Buffer.from([1]))
@@ -280,9 +249,9 @@ const catchBarcd = setInterval(() => {
 }, 1000)
 
 const catchBarcdFromPLC = function () {
-    if (!barcdStatus.value) {
-        return
-    }
+    // if (!barcdStatus.value) {
+    //     return
+    // }
     addBarcdMsg('plc', '读取Barcd标识位', 'info')
     ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcdSign).then((result) => {
         // console.log(result)
@@ -352,10 +321,12 @@ const validBarcd = function (barcd) {
     soapClient.valid(barcd).then(res => {
         // ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
         mesValidMsg.value = '校验序列号:' + barcd + ":" + res.ErrMsg
-        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd])).then(addRes => {
-            console.log(addRes)
+        let aufnr = res.Data.Aufnr
+        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd, aufnr])).then(addRes => {
+            // console.log(addRes)
         })
         resetBarcdSign()
+        barcdStatus.value = true
         addBarcdMsg('mes', res, 'info')
     }).catch(err => {
         mesValidMsg.value = 'MES校验失败：' + err.ErrMsg + " Code:" + err.ErrCode
@@ -376,11 +347,9 @@ const resetBarcdSign = function () {
     })
 }
 
-const msg = ref('1')
 const plcBarcdSignError = function () {
     ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.barcdSignError, Buffer.from([1])).then(barcdSignErrRes => {
         // console.log(barcdSignErrRes)
-        msg.value = '写入错误标识位成功'
         if (barcdSignErrRes.success) {
             addBarcdMsg('plc', '写入错误标识位成功', 'info')
         } else {
@@ -399,6 +368,7 @@ function addBarcdMsg(type, msg, info) {
         info
     }
     if (msg != lastBarcdMsg) {
+        // console.log(msg != lastBarcdMsg, msg, lastBarcdMsg)
         tthis.$refs.barcdMsgWindow.sendMessage(param)
     }
     lastBarcdMsg = msg
@@ -415,7 +385,7 @@ function addPkgNumberMsg(type, msg, info) {
     if (msg != lastPkgdMsg) {
         tthis.$refs.weightMsgWindow.sendMessage(param)
     }
-    lastBarcdMsg = msg
+    lastPkgdMsg = msg
     if (info == 'error') {
         pkgNumberStatus.value = false
         printStatus.value = false

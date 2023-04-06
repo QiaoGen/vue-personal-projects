@@ -182,7 +182,27 @@ alarms.forEach(e => {
  * !DB块字符串需要去除前后符号
  */
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const plcCommand = !isDevelopment ? {
+// const plcCommand = !isDevelopment ? {
+//     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 4800, amount: 1, desc: '序列号标识位', name: 'barcdSign' },
+//     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 4801, amount: 1, desc: '序列号错误标识位', name: 'barcdSignError' },
+//     heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 4803, amount: 1, desc: '心跳', name: 'heartbeat' },
+//     barcd: { area: areas.DB, dbNumber: 16, start: 0, size: 20, desc: '序列号', name: 'barcd' },//size => byte
+//     weightSign: { area: areas.M, wordLen: wordLens.bit, start: 4808, amount: 1, desc: '称重标识位', name: 'weightSign' },
+//     weight: { area: areas.M, wordLen: wordLens.byte, start: 700, amount: 4, desc: '称重数据', name: 'weight' },
+//     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
+//     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
+// } : {
+//     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
+//     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
+//     heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 20, amount: 1, desc: '心跳', name: 'heartbeat' },
+//     barcd: { area: areas.DB, dbNumber: 1, start: 0, size: 5, desc: '序列号', reply: 'barcd_reply' },//size => b,},//size => byte
+//     weightSign: { area: areas.M, wordLen: wordLens.bit, start: 34, amount: 1, desc: '称重标识位', reply: 'weightSign_reply', name: 'weightSign' },
+//     weight: { area: areas.M, wordLen: wordLens.byte, start: 20, amount: 4, desc: '称重数据', reply: 'weight_reply', name: 'weight' },
+//     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 489, amount: 1, desc: 'mes集成码错误', reply: '', name: 'pkgNumberError' },
+//     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
+//     }
+
+const plcCommand = {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 4800, amount: 1, desc: '序列号标识位', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 4801, amount: 1, desc: '序列号错误标识位', name: 'barcdSignError' },
     heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 4803, amount: 1, desc: '心跳', name: 'heartbeat' },
@@ -191,15 +211,6 @@ const plcCommand = !isDevelopment ? {
     weight: { area: areas.M, wordLen: wordLens.byte, start: 700, amount: 4, desc: '称重数据', name: 'weight' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
-} : {
-    barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
-    barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
-    heartbeat: { area: areas.M, wordLen: wordLens.bit, start: 4803, amount: 1, desc: '心跳', name: 'heartbeat' },
-    barcd: { area: areas.DB, dbNumber: 1, start: 0, size: 5, desc: '序列号', reply: 'barcd_reply' },//size => b,},//size => byte
-    weightSign: { area: areas.M, wordLen: wordLens.bit, start: 34, amount: 1, desc: '称重标识位', reply: 'weightSign_reply', name: 'weightSign' },
-    weight: { area: areas.M, wordLen: wordLens.byte, start: 20, amount: 4, desc: '称重数据', reply: 'weight_reply', name: 'weight' },
-    pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 489, amount: 1, desc: 'mes集成码错误', reply: '', name: 'pkgNumberError' },
-    alarm: { area: areas.M, wordLen: wordLens.byte, start: 1, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
 }
 
 export default {

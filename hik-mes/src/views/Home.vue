@@ -7,9 +7,9 @@
       <div class="centent">
         <n-layout style="height: 100%;">
           <router-view v-slot="{ Component }">
-            <!-- <keep-alive include="MainWindow"> -->
-            <component :is="Component" :alarms="alarms" />
-            <!-- </keep-alive> -->
+            <keep-alive include="MainWindow">
+              <component :is="Component" :alarms="alarms" />
+            </keep-alive>
           </router-view>
         </n-layout>
       </div>
@@ -33,7 +33,6 @@ import constant from '@/lib/constant'
 import store from '@/store'
 import utils from '@/utils/utils';
 import dayjs from 'dayjs'
-import s7client from '@/lib/s7client';
 
 
 
@@ -45,32 +44,32 @@ const workFlag = computed(() => {
 })
 
 // 设备告警信息/PLC数据
-const readPLC = function () {
-  ipcRenderer.send('plc-msg', 'readPLC')
-}
+// const readPLC = function () {
+//   ipcRenderer.send('plc-msg', 'readPLC')
+// }
 
-const warnCategory = {
-  "01": {
-    name: '工艺参数',
-    "0": '不合格',
-    "1": '合格'
-  },
-  "02": {
-    name: '设备状态',
-    "01": '运行',
-    "02": '停止',
-    "03": '故障'
-  },
-  "03": {
-    name: '报警信息'
-  },
-  "04": {
-    name: '产量'
-  },
-  "05": {
-    name: '心跳'
-  },
-}
+// const warnCategory = {
+//   "01": {
+//     name: '工艺参数',
+//     "0": '不合格',
+//     "1": '合格'
+//   },
+//   "02": {
+//     name: '设备状态',
+//     "01": '运行',
+//     "02": '停止',
+//     "03": '故障'
+//   },
+//   "03": {
+//     name: '报警信息'
+//   },
+//   "04": {
+//     name: '产量'
+//   },
+//   "05": {
+//     name: '心跳'
+//   },
+// }
 
 // const getIPPortStatus = function(){
 //     ipcRenderer.send('checkIPPort-msg')
@@ -92,8 +91,13 @@ ipcRenderer.on('sysInfo-reply', function (event, arg) {
 
 //心跳
 const heartbeat = setInterval(() => {
-  s7client.write('plc-msg-invoke', 'write', constant.plcCommand.heartbeat, Buffer.from([1])).then(res => {
-    console.log('heartbeat')
+  // if (!workFlag.value) {
+  //   return
+  // }
+  ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.heartbeat, Buffer.from([1])).then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
   })
   // getIPPortStatus()
   //发送心跳同时发送设备运行状态,检测plc/tcp连接状态 ping ip port

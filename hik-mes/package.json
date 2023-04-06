@@ -51,11 +51,5 @@
   ],
   "resolutions": {
     "vue-cli-plugin-electron-builder/electron-builder": "^23.0.3"
-  },
-  "build": {
-    "productName": "点型烟杆包装线",
-    "win": {
-      "icon": "./public/sw.ico"
-    }
   }
 }

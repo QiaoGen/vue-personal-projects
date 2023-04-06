@@ -5,7 +5,9 @@ const store = createStore({
     state: {
         sysConfig: {
             WorkStation: null,
-            MachineId: null
+            MachineId: null,
+            ip: null,
+            port: null
         },
         theme: 'white',
         role: null,

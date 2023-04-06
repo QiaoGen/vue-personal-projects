@@ -164,13 +164,13 @@ const DBRead = function (dbNumber, start, size) {
 //Code #599878 -  ISO : An error occurred during send TCP : Connection reset by peer
 //Code #589884 -  ISO : An error occurred during send TCP : Connection timed out
 const errorResult = function (err) {
-    plcConnetStatus = false
-    log.error('plc error---:' + err)
-    if (err.includes('#599878') || err.includes('#589884') || err.includes('#655420') || err.includes('#589856')) {
-        log.error('try reconnect PLC')
-        tryTimes = tryTimes + 1
-        // ConnectTo()
-    }
+    // plcConnetStatus = false
+    // log.error('plc error---:' + err)
+    // if (err.includes('#599878') || err.includes('#589884') || err.includes('#655420') || err.includes('#589856')) {
+    //     log.error('try reconnect PLC')
+    //     tryTimes = tryTimes + 1
+    //     // ConnectTo()
+    // }
 }
 
 export default {

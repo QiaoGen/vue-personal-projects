@@ -27,6 +27,14 @@ const connectPLC = function () {
 }
 connectPLC()
 
+// 传递ipcRenderer页面log数据
+ipcMain.on('log-msg-info', function (event, arg) {
+  log.info("ipcRenderer info:" + arg)
+})
+// ipcMain.on('log-msg-error', function (event, arg) {
+//   log.error("ipcRenderer error:" + arg)
+// })
+
 // 传递render页面 plc数据
 var PLCInfo = {
   plcConnetStatus: s7client.plcConnetStatus,
@@ -73,24 +81,14 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
         result.success = false
         result.value = err
       }
-      // await s7client.read(arg[1]).then(res => {
-      //   result.success = true
-      //   result.value = res
-      //   log.info(result)
-      // }).catch(err => {
-      //   result.success = false
-      //   result.value = err
-      // })
       break;
     case 'write':
       await s7client.write(arg[1], arg[2]).then(res => {
         result.success = true
         result.value = res
-        // event.sender.send(arg[1].reply, result)
       }).catch(err => {
         result.success = false
         result.value = err
-        // event.sender.send(arg[1].reply, result)
       })
       break;
   }

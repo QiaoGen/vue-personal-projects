@@ -73,25 +73,6 @@ function valid(barcd) {
     })
 }
 
-// function uploadMsg(args) {
-//     return new Promise((reslove, reject) => {
-//         soap.createClient(url, (err, client) => {
-//             if (err) {
-//                 reject(err)
-//                 console.error(err)
-//             } else {
-//                 client.writeMachineData({ data: JSON.stringify(args) }, function (err1, result) {
-//                     if (err1) {
-//                         reject(err1)
-//                     } else {
-//                         reslove(JSON.parse(result.return))
-//                     }
-//                 })
-//             }
-//         })
-//     })
-// }
-
 function sendPkgNumber(data) {
     return new Promise((reslove, reject) => {
         soap.createClient(url, (err, client) => {
@@ -106,7 +87,7 @@ function sendPkgNumber(data) {
                         reject(err1)
                     } else {
                         let resultData = JSON.parse(result.return)
-                        if (resultData.ErrCode == '0') {
+                        if (resultData.ErrCode == '0' || (res.ErrCode == '700022' && resultData.Data.PkgNumber.includes('@'))) {
                             reslove(resultData)
                         } else {
                             reject(resultData)

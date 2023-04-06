@@ -23,8 +23,7 @@
             </div>
         </div>
         <div style="padding:0px 10px;">
-            <n-data-table striped bordered="true" :columns="columns" :data="data"
-            :pagination="pagination" />
+            <n-data-table striped bordered="true" :columns="columns" :data="data" :pagination="pagination" />
         </div>
     </div>
 </template>
@@ -48,6 +47,10 @@ const columns = reactive([
     {
         key: 'ValidStatus',
         title: '验证状态'
+    },
+    {
+        key: 'Aufnr',
+        title: '订单号'
     },
     {
         key: 'PkgNumber',
@@ -82,7 +85,7 @@ const search = function () {
 ipcRenderer.on('searchBarcdList-reply', function (event, arg) {
     if (arg.success) {
         arg.msg.forEach(el => {
-            el.ValidStatus = el.ValidStatus == 1? '已校验':'未校验'
+            el.ValidStatus = el.ValidStatus == 1 ? '已校验' : '未校验'
         });
         data.value = arg.msg
     }
