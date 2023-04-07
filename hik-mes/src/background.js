@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import log from '@/utils/log.js'
@@ -427,6 +427,11 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+
+  globalShortcut.register('CommandOrControl+Shift+L', () => {
+    let focusWin = BrowserWindow.getFocusedWindow()
+    focusWin && focusWin.toggleDevTools()
+  })
 })
 
 // Exit cleanly on request from parent process in development mode.
