@@ -112,7 +112,7 @@ function sendPkgNumber(param) {
                         reject(err1)
                     } else {
                         let resultData = JSON.parse(result.return)
-                        if (resultData.ErrCode == '0' || (res.ErrCode == '700022' && resultData.Data.PkgNumber.includes('@'))) {
+                        if (resultData.ErrCode == '0' || (resultData.ErrCode == '700022' && resultData.Data.PkgNumber.includes('@'))) {
                             reslove(resultData)
                         } else {
                             reject(resultData)
