@@ -81,7 +81,8 @@ const heartbeat = setInterval(() => {
     return
   }
   ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.heartbeat, Buffer.from([1])).then(res => {
-    console.log(res)
+    // console.log(res)
+    console.log('heartbeat')
   }).catch(err => {
     console.log(err)
   })
