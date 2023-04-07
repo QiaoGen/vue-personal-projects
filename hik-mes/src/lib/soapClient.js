@@ -47,8 +47,8 @@ function valid(barcd) {
     return new Promise((reslove, reject) => {
         soap.createClient(url, (err, client) => {
             if (err) {
-                reject(err)
                 console.error(err)
+                reject(err)
             } else {
                 let param = {
                     "Barcd": barcd,
@@ -96,14 +96,16 @@ function valid(barcd) {
 // 注意：
 // ErrCode 700022 包装箱号生成成功 但打印服务不存在，打印失败
 // 不能将成功的判定条件定为 ErrCode =0，判定成功逻辑为 PkgNumber 有内容且以@开头
-function sendPkgNumber(data) {
+function sendPkgNumber(param) {
     return new Promise((reslove, reject) => {
+        // let result = { Data: { PkgNumber: '@11222222' } }
+        // reslove(result)
         soap.createClient(url, (err, client) => {
             if (err) {
-                reject(err)
                 console.error(err)
+                reject(err)
             } else {
-                args.Datas = data
+                args.Datas = param
                 args.Id = uuid()
                 client.execute({ data: JSON.stringify(args) }, function (err1, result) {
                     if (err1) {

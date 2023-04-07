@@ -202,34 +202,33 @@ const generatePkgNumber = function () {
     ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
     ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
     ipcRenderer.send('log-msg-info', 'runFlag:' + runFlag.value)
-    if (runFlag) {
-        return
-    }
     // //是否满100箱数据 //数量 >= 100 判断是否有重量 
-    if (readyBarcdList.value.length < 100 || weight.value == null) {
+    if (runFlag.value || readyBarcdList.value.length < 100 || weight.value == null) {
         return
     }
     runFlag.value = true
+    ipcRenderer.send('log-msg-info', 'comming---------------package')
     let param = []
     let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
     if (tempList.length > 100) {
         tempList = tempList.slice(0, 100)
     }
     for (let i = 0; i < tempList.length - 1; i++) {
-        param.push({ Barcd: readyBarcdList.value[i] })
+        param.push({ Barcd: tempList.value[i].Barcd })
     }
-    param.push({ Barcd: tempList[tempList.length - 1], PkgInfo: { Weigth: weight.value } })
+    param.push({ Barcd: tempList[tempList.length - 1].Barcd, PkgInfo: { Weigth: weight.value } })
+    ipcRenderer.send('log-msg-info', 'param pkg:' + JSON.stringify(param))
     soapClient.sendPkgNumber(param).then(res => {
         ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res)
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
-        let param = []
-        param.push(pkgNumber.value)
+        let sqlparam = []
+        sqlparam.push(pkgNumber.value)
         tempList.forEach(e => {
-            param.push(e)
+            sqlparam.push(e)
         })
-        param.push(pkgNumber.value)
-        ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(param))
+        sqlparam.push(pkgNumber.value)
+        ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(sqlparam))
         addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
         addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')
         ipcRenderer.send('log-msg-info', 'ready to print: ')
