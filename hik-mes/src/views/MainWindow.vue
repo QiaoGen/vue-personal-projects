@@ -191,15 +191,20 @@ function getUint8Array(len, setNum) {
     return new Uint8Array(buffer); //创建一个字节数组，从缓存中拿取数据
 }
 
-const flag = ref(true)
+//包装运行状态界定,循环中只能进入一次
+const runFlag = ref(false)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
-    // //是否满100箱数据
+    if (runFlag) {
+        return
+    }
+    // //是否满100箱数据 //数量 >= 100 判断是否有重量 
+    if (readyBarcdList.value.length < 100 || weight.value == null) {
+        return
+    }
+    runFlag.value = true
     ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
     ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
-    if (readyBarcdList.value.length >= 100 && weight.value != null) {
-        generatePkgNumber()
-    }
     let param = []
     let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
     if (tempList.length > 100) {
