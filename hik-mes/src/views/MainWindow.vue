@@ -36,7 +36,7 @@
                         <div>集成码标志</div>
                         <div :class="pkgNumberStatus ? 'point_green' : 'point'"></div>
                         <div style="margin-left: 20px;">打印标志</div>
-                        <div :class="printStatus ? 'point_green' : 'point'"></div>
+                        <div :class="tcpStatus ? 'point_green' : 'point'"></div>
                     </div>
                 </div>
                 <div class="barch_f">
@@ -151,7 +151,7 @@ const getWeight = function () {
         // ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.weight, getUint8Array(4, function (view) { view.setUint32(0, 2345); })).then(weightResult => {
         // })
         if (!weightSignResult.success) {
-            addPkgNumberMsg('plc', weightSignResult.value, 'error')
+            addPkgNumberMsg('plc', '读取称重标识位失败', 'error')
             return
         }
         if (weightSignResult.value[0] == 0) {
@@ -167,7 +167,7 @@ const getWeight = function () {
                 if (readyBarcdList.value.length >= 100 && weight.value != null) {
                     generatePkgNumber()
                 }
-                addPkgNumberMsg('plc', '读取称重数据' + weightTemp + 'g', 'info')
+                addPkgNumberMsg('plc', '读取称重数据:' + weightTemp + 'g', 'info')
                 //称重标志位归位
                 resetWeightSign()
             }
@@ -332,7 +332,7 @@ const validBarcd = function (barcd) {
         })
         resetBarcdSign()
         barcdStatus.value = true
-        addBarcdMsg('mes', res, 'info')
+        addBarcdMsg('mes', '订单号：' + aufnr + ' 序列号:' + barcd + ' ' + res.ErrMsg, 'info')
     }).catch(err => {
         mesValidMsg.value = 'MES校验失败：' + err.ErrMsg + " Code:" + err.ErrCode
         plcBarcdSignError()

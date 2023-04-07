@@ -11,9 +11,9 @@
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
           @update:value="selectMenu" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22" />
-        <n-button type="error" v-if="!plcStatus" @click="reConnectPLC" style="margin-right: 10px;">重连PLC</n-button>
-        <n-button type="error" v-if="!tcpStatus" @click="reConnectPLC" style="margin-right: 10px;">重连打印机</n-button>
-        <n-button type="error" v-if="!mesStatus" @click="reConnectPLC" style="margin-right: 10px;">Mes地址无法通信</n-button>
+        <n-button type="error" v-if="!plcStatus" @click="reconnectPLC" class="err_btn">重连PLC</n-button>
+        <n-button type="error" v-if="!tcpStatus" @click="reconnectPrintServer" class="err_btn">重连打印机</n-button>
+        <n-button type="error" v-if="!mesStatus" @click="reConnect" class="err_btn">重新检测Mes地址</n-button>
         <!-- <div class="tip">
           <n-button dashed type="error">设备异常{{}}</n-button>
         </div> -->
@@ -180,6 +180,10 @@ watch(() => route.currentRoute._value.fullPath, (newPath, oldPath) => {
   width: 100%;
   justify-content: center;
   align-items: center;
+}
+
+.err_btn {
+  margin: 0 10px 5px 10px;
 }
 
 .tip>button {
