@@ -214,7 +214,7 @@ const generatePkgNumber = function () {
         tempList = tempList.slice(0, 100)
     }
     for (let i = 0; i < tempList.length - 1; i++) {
-        param.push({ Barcd: tempList.value[i].Barcd })
+        param.push({ Barcd: tempList[i].Barcd })
     }
     param.push({ Barcd: tempList[tempList.length - 1].Barcd, PkgInfo: { Weigth: weight.value } })
     ipcRenderer.send('log-msg-info', 'param pkg:' + JSON.stringify(param))
@@ -225,7 +225,7 @@ const generatePkgNumber = function () {
         let sqlparam = []
         sqlparam.push(pkgNumber.value)
         tempList.forEach(e => {
-            sqlparam.push(e)
+            sqlparam.push(e.Barcd)
         })
         sqlparam.push(pkgNumber.value)
         ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(sqlparam))
