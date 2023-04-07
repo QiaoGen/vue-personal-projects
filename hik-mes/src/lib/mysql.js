@@ -351,8 +351,8 @@ const updateSysConfig = function (param1) {
     let param = JSON.parse(param1)
     // console.log('param:', param)
     return new Promise((resolve, reject) => {
-        pool.execute('update `sys_config` set `PrintPort` = ?,`PrintIP` = ?, `WorkStation` = ?, `MachineId` = ? where 1=1',
-            [param.port, param.ip, param.WorkStation, param.MachineId],
+        pool.execute('update `sys_config` set `PrintPort` = ?,`PrintIP` = ?, `WorkStation` = ?, `MachineId` = ?, `PLCIP` = ? where 1=1',
+            [param.port, param.ip, param.WorkStation, param.MachineId, param.PLCIP],
             function (err, results, fields) {
                 if (err) {
                     reject(err)

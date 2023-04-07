@@ -7,8 +7,17 @@ const mysql = {
     updateUser_reply: 'updateUser-reply',
     queryByUser: 'queryByUser',
     queryByUser_reply: 'queryByUser-reply',
+    querySysConfig: 'querySysConfig',
     insertBarcd: 'insertBarcd',
-    insertAlarm: 'insertAlarm'
+    insertAlarm: 'insertAlarm',
+}
+
+const sysOperate = {
+    connectPLC: 'connectPLC',
+    checkPLCAddress: 'checkPLCAddress',
+    checkTCPAddress: 'checkTCPAddress',
+    connectPrintServer: 'connectPrintServer',
+    sendToPrint: 'sendToPrint'
 }
 
 //plc数据类型
@@ -64,6 +73,10 @@ const alarms = [
             "泡罩机抓手吸盘负压报警显示",
             "泡罩机扫码位产品数据已发送至上位机手动放行后复位启动",
             "泡罩机与装箱机通讯异常",
+            "泡罩扫码结果重复或上位机反馈异常",
+            "称重后MES反馈错误",
+            "泡罩机剔除满料报警",
+            "上位机通讯异常报警检查软件是否运行"
         ]
     },
     {
@@ -99,6 +112,8 @@ const alarms = [
             "装箱机隔板升降气缸上限检测异常",
             "装箱机与称重机通讯异常",
             "装箱机与开箱机通讯异常",
+            "",
+            "装箱机隔板缺料提示"
         ]
     }, {
         machine: '投盒机', amount: 4, color: 'rgb(240,160,32)', content: [
@@ -218,5 +233,6 @@ export default {
     plcCommand,
     wordLens,
     areas,
-    alarms
+    alarms,
+    sysOperate
 }

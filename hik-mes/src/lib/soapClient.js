@@ -1,12 +1,12 @@
 var soap = require('soap')
 import store from '@/store'
 
-var url = '';
-if (process.env.NODE_ENV == 'development') {
-    url = 'http://10.1.48.182:8091/ws/manMachine?wsdl';
-} else if (process.env.NODE_ENV == 'production') {
-    url = 'http://mes-expose.hikvision.com:12304/ws/manMachine?wsdl';
-}
+var url = 'http://mes-expose.hikvision.com:12304/ws/manMachine?wsdl';
+// if (process.env.NODE_ENV == 'development') {
+//     url = 'http://10.1.48.182:8091/ws/manMachine?wsdl';
+// } else if (process.env.NODE_ENV == 'production') {
+//     url = 'http://mes-expose.hikvision.com:12304/ws/manMachine?wsdl';
+// }
 var args = {
     "Id": "",
     "ServerName": "SCAN_BARCD_SUBMIT",
@@ -73,6 +73,29 @@ function valid(barcd) {
     })
 }
 
+// 获取集成码 接口不支持尾箱、非满箱
+// Id 消息编号，可以为 guid
+// WorkStation：MES 扫描站点（需可配置）
+// MachineId：设备编号（需可配置）
+// Barcd：序列号
+// PkgInfo. Weigth 包装箱重量，单位 KG
+// 注意：
+// 1. 所有序列号必须通过接口一验证，才能允许调用接口二。
+// 2. PkgInfo. Weigth 只能在最后一个序列号里面，且必须大于 0
+// 响应json
+// {
+//     "Data": {
+//          "PkgNumber": "@800000517"
+//     },
+//     "ErrCode": "0",
+//     "ErrMsg": "",
+//     "Id": "1234567"
+// }
+// ErrCode：0 成功，非 0 失败
+// PkgNumber：集成码（包装号），一般以@开头
+// 注意：
+// ErrCode 700022 包装箱号生成成功 但打印服务不存在，打印失败
+// 不能将成功的判定条件定为 ErrCode =0，判定成功逻辑为 PkgNumber 有内容且以@开头
 function sendPkgNumber(data) {
     return new Promise((reslove, reject) => {
         soap.createClient(url, (err, client) => {

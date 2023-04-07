@@ -1,12 +1,14 @@
 import net from 'net'
-import store from '@/store'
-import { computed, watch } from 'vue'
+import log from '@/utils/log'
 
-var client = new net.Socket()
+var client = net.Socket()
 // 连接打印机服务
 const connectPrintServer = function (ip, port) {
-    client.connect(port, ip, function () {
-        console.log('connect ' + ip + ':' + port + ' success')
+    return new Promise((reslove, reject) => {
+        client.connect(port, ip, function () {
+            log.info('connect ' + ip + ':' + port + ' success')
+        })
+        reslove(true)
     })
 }
 
@@ -18,8 +20,7 @@ var sendToPrint = function (Aufnr, PkgNumber) {
             "PkgNumber": PkgNumber, //集成码
         }
     }
-    console.log(param)
-    let arr = [Buffer.from([2]), Buffer.from(JSON.stringify(param)), Buffer.from([3])]
+    let arr = [Buffer.from([2]), Buffer.from(JSON.stringify(param.toString())), Buffer.from([3])]
     let paramArray = Buffer.concat(arr)
     client.write(paramArray)
 }
@@ -35,21 +36,8 @@ client.on("end", function () {
     loggerIPC("disconect from Server");
 })
 
-const tcpStatus = computed(() => {
-    return store.state.tcpStatus
-})
-
-watch(tcpStatus, (value, old) => {
-    console.log('tcp  变化----', value, old)
-    if (value === false) {
-        client.destroy()
-    }
-}, { immediate: true })
-
-
 function loggerIPC(str) {
-    // ipcRenderer.send('log-msg-info', str)
-    console.log('log-msg-info', str)
+    log.info('log-msg-info', str)
 }
 
 export default {

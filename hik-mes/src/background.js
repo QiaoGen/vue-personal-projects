@@ -13,50 +13,8 @@ import electron from 'electron'
 
 mysql.connect()
 
-
 // log.initialize({ preload: true });
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
-const connectPLC = function () {
-  s7client.ConnectTo('10.69.156.101').then(res => {
-    PLCInfo.plcConnetStatus = res
-  }).catch(err => {
-    PLCInfo.plcConnetStatus = err
-  })
-  // log.info(1)
-}
-connectPLC()
-
-// 传递ipcRenderer页面log数据
-ipcMain.on('log-msg-info', function (event, arg) {
-  log.info("ipcRenderer info:" + arg)
-})
-// ipcMain.on('log-msg-error', function (event, arg) {
-//   log.error("ipcRenderer error:" + arg)
-// })
-
-// 传递render页面 plc数据
-var PLCInfo = {
-  plcConnetStatus: s7client.plcConnetStatus,
-}
-ipcMain.on('plc-msg', function (event, ...arg) {
-  let result = {
-    success: true,
-    msg: null,
-    value: null
-  }
-  log.info('plc-msg:' + arg)
-  switch (arg[0]) {
-    case 'getPLCInfo':
-      event.sender.send('getPLCInfo-reply', PLCInfo)
-      break;
-    case 'reconnectPLC':
-      // s7client.ConnectTo('192.168.2.1')
-      connectPLC()
-      event.sender.send('getPLCInfo-reply', PLCInfo)
-      break;
-  }
-})
 
 ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
   let result = {
@@ -323,41 +281,79 @@ ipcMain.on('logFile-msg', function (event, ...arg) {
   }
 })
 
-// 系统告警数据
-ipcMain.on('sysInfo-msg', function (event, ...arg) {
+//非数据库其他操作 连接建立,连接检查
+ipcMain.handle('connect-invoke', async function (event, ...arg) {
+  let result = {
+    success: null,
+    msg: null,
+    value: null
+  }
+  switch (arg[0]) {
+    //连接plc 生产地址10.69.156.101
+    case constant.sysOperate.connectPLC:
+      await s7client.ConnectTo(arg[1]).then(res => {
+        result.success = true
+        result.msg = 'PLC连接成功'
+        result.value = res
+      }).catch(err => {
+        result.success = false
+        result.msg = 'PLC连接失败'
+        result.value = err
+      })
+      break;
+    //默认地址 localhost 需要前置判断是否为空
+    case constant.sysOperate.checkPLCAddress:
+      await checkPLCAddress(arg[1]).then(res => {
+        result.success = res
+        result.value = res
+        log.info(constant.sysOperate.checkPLCAddress + ":" + arg[1] + ' result:' + res)
+      }).catch(err => {
+        log.error(err)
+      })
+      break;
+    case constant.sysOperate.checkTCPAddress:
+      await checkTCPAddress(arg[1], arg[2]).then(res => {
+        result.success = res
+        result.value = res
+        log.info(constant.sysOperate.checkTCPAddress + ":" + arg[1] + "/" + arg[2] + ' result:' + res)
+      }).catch(err => {
+        log.error(err)
+      })
+      break;
 
-})
-
-// 渲染进程获取ip 端口状态
-ipcMain.on('checkIPPort-msg', function (event, arg) {
-  checkTCPCOnnect().then(res => {
-    event.sender.send('getIPPort-reply', { tcp: res })
-  })
-  checkPLCCOnnect().then(res => {
-    event.sender.send('getIPPort-reply', { plc: res })
-  })
+  }
+  return result
 })
 
 log.info("userData: " + app.getPath('userData'))
 
 // 获取系统数据检测地址是否能ping通
-const checkTCPCOnnect = function () {
+const checkTCPAddress = function (PrintIP, PrintPort) {
   return new Promise((resolve) => {
-    mysql.querySysConfig().then(res => {
-      let sysConfig = JSON.parse(res)[0]
-      tcpp.probe(sysConfig.PrintIP, sysConfig.PrintPort, function (err, available) {
-        resolve(available)
-      });
+    tcpp.probe(PrintIP, PrintPort, function (err, available) {
+      resolve(available)
     })
   })
 }
-const checkPLCCOnnect = function () {
+const checkPLCAddress = function (PLCIP) {
   return new Promise((resolve) => {
-    tcpp.ping({ address: '192.168.2.1', timeout: 2000, attempts: 1 }, function (err, data) {
+    tcpp.ping({ address: PLCIP, attempts: 3 }, function (err, data) {
+      log.info('ping plc ip:' + PLCIP)
+      log.info(data)
+      // resolve(!Object.is(data.avg, NaN))
       resolve(data.results[0].err.toString().indexOf('timeout') == -1)
     })
   })
 }
+
+// 传递ipcRenderer页面log数据
+ipcMain.on('log-msg-info', function (event, arg) {
+  log.info("ipcRenderer info:" + arg)
+})
+// ipcMain.on('log-msg-error', function (event, arg) {
+//   log.error("ipcRenderer error:" + arg)
+// })
+
 
 
 // Scheme must be registered before the app is ready
@@ -377,7 +373,8 @@ async function createWindow() {
       webSecurity: false,
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      // nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      nodeIntegration: true,
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
     }
   })

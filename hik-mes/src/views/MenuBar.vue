@@ -11,7 +11,9 @@
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
           @update:value="selectMenu" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22" />
-        <!-- <n-button type="error" @click="reConnectPLC" style="margin-right: 10px;">重连PLC</n-button> -->
+        <n-button type="error" v-if="!plcStatus" @click="reConnectPLC" style="margin-right: 10px;">重连PLC</n-button>
+        <n-button type="error" v-if="!tcpStatus" @click="reConnectPLC" style="margin-right: 10px;">重连打印机</n-button>
+        <n-button type="error" v-if="!mesStatus" @click="reConnectPLC" style="margin-right: 10px;">Mes地址无法通信</n-button>
         <!-- <div class="tip">
           <n-button dashed type="error">设备异常{{}}</n-button>
         </div> -->
@@ -57,6 +59,15 @@ const role = computed(() => {
 })
 const updateMenu = computed(() => {
   return store.state.updateMenu
+})
+const plcStatus = computed(() => {
+  return store.state.plcStatus
+})
+const mesStatus = computed(() => {
+  return store.state.mesStatus
+})
+const tcpStatus = computed(() => {
+  return store.state.tcpStatus
 })
 
 

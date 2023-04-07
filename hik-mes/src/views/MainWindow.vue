@@ -74,18 +74,24 @@ import MessageWindow from '@/components/home/MessageWindow.vue'
 import { ref, onDeactivated, onBeforeUnmount, getCurrentInstance, computed } from 'vue'
 import { ipcRenderer } from 'electron'
 import store from '@/store'
-import hik from '@/lib/hik'
 import constant from '@/lib/constant'
 import utils from '@/utils/utils'
 import soapClient from '@/lib/soapClient'
 
-//连接打印机服务
-hik.connectPrintServer()
 
 const { proxy: tthis } = getCurrentInstance()
 
 const workFlag = computed(() => {
     return store.state.workFlag
+})
+const plcStatus = computed(() => {
+    return store.state.plcStatus
+})
+const mesStatus = computed(() => {
+    return store.state.mesStatus
+})
+const tcpStatus = computed(() => {
+    return store.state.tcpStatus
 })
 // console.log(workFlag.value)
 
@@ -199,7 +205,6 @@ const generatePkgNumber = function () {
         param.push({ Barcd: readyBarcdList.value[i] })
     }
     param.push({ Barcd: tempList[tempList.length - 1], PkgInfo: { Weigth: weight.value } })
-    // hik.getPkgNumber(param).then(res => {
     soapClient.sendPkgNumber(param).then(res => {
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
@@ -209,7 +214,7 @@ const generatePkgNumber = function () {
             param.push(e)
         })
         param.push(pkgNumber.value)
-        ipcRenderer.send('updateBarcdPkgStatus', JSON.stringify(param))
+        ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(param))
         addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
         addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')
         readyToPrint(tempList[0].Aufnr, PkgNumber)
@@ -224,7 +229,7 @@ const generatePkgNumber = function () {
 }
 
 const readyToPrint = function (Aufnr, PkgNumber) {
-    hik.sendToPrint(Aufnr, PkgNumber)
+
 }
 
 // console.log(Buffer.from([1]))
@@ -241,7 +246,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
  * 
  */
 const catchBarcd = setInterval(() => {
-    if (!workFlag.value) {
+    if (!workFlag.value || !plcStatus.value || !mesStatus || !tcpStatus) {
         return
     }
     catchBarcdFromPLC()
@@ -411,7 +416,7 @@ const flushData = function () {
 
 //清空缓存
 const clearAll = function () {
-    ipcRenderer.send('deleteAllBarcd')
+    ipcRenderer.send('mysql-msg', 'deleteAllBarcd')
 }
 
 //ipcRenderer.on

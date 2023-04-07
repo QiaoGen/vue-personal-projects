@@ -34,19 +34,12 @@ import store from '@/store'
 import utils from '@/utils/utils';
 import dayjs from 'dayjs'
 
-
-
-const msgNum = ref(0)
-
-
 const workFlag = computed(() => {
   return store.state.workFlag
 })
-
-// 设备告警信息/PLC数据
-// const readPLC = function () {
-//   ipcRenderer.send('plc-msg', 'readPLC')
-// }
+const plcStatus = computed(() => {
+  return store.state.plcStatus
+})
 
 // const warnCategory = {
 //   "01": {
@@ -71,13 +64,6 @@ const workFlag = computed(() => {
 //   },
 // }
 
-// const getIPPortStatus = function(){
-//     ipcRenderer.send('checkIPPort-msg')
-// }
-// ipcRenderer.on('getIPPort-reply', function(event, arg){
-//     console.log(arg)
-// })
-// getIPPortStatus()
 
 // 告警信息格式定义
 // {
@@ -91,9 +77,9 @@ ipcRenderer.on('sysInfo-reply', function (event, arg) {
 
 //心跳
 const heartbeat = setInterval(() => {
-  // if (!workFlag.value) {
-  //   return
-  // }
+  if (!plcStatus.value) {
+    return
+  }
   ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.heartbeat, Buffer.from([1])).then(res => {
     console.log(res)
   }).catch(err => {
@@ -136,10 +122,10 @@ const addAlarm = function (index, desc) {
   }
 }
 
-//100ms更新频率
+//获取告警信息 100ms更新频率
 const catchAlarm = setInterval(() => {
   // let start = dayjs().valueOf()
-  if (!workFlag.value) {
+  if (!plcStatus.value) {
     return
   }
   let indexArray = []

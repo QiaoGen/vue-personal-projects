@@ -1,5 +1,5 @@
 import logger from 'electron-log'
-import {app} from 'electron'
+import { app } from 'electron'
 
 logger.transports.file.level = 'debug'
 logger.transports.file.maxSize = 1002430 // 10M
@@ -8,24 +8,24 @@ let date = new Date()
 date = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()
 logger.transports.file.file = app.getPath('userData') + '\\electron_log\\app\\' + date + '.log'
 // logger.transports.file.file = app.getPath('userData') + '\/electron_log\/app\/' + date + '.log'
- 
+
 export default {
-  info (param) {
+  info(param) {
     logger.info(param)
-  },                   
-  warn (param) {
+  },
+  warn(param) {
     logger.warn(param)
   },
-  error (param) {
+  error(param) {
     logger.error(param)
   },
-  debug (param) {
-    logger.debug(param) 
+  debug(param) {
+    logger.debug(param)
   },
-  verbose (param) {
+  verbose(param) {
     logger.verbose(param)
   },
-  silly (param) {
+  silly(param) {
     logger.silly(param)
   }
 }

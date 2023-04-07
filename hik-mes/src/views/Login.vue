@@ -24,11 +24,16 @@ import route from "@/router"
 import { ipcRenderer } from "electron";
 import constant from "@/lib/constant";
 import store from '@/store'
+import hik from '@/lib/hik'
 
 //重制menu刷新状态
 store.commit('updateMenu', false)
 //任务初始化
 store.commit('updateworkFlag', false)
+//重置连接状态
+store.commit('updateplcStatus', false)
+store.commit('updatemesStatus', false)
+store.commit('updatetcpStatus', false)
 
 const imgUrl = require('@/assets/bg.png')
 
@@ -94,11 +99,49 @@ ipcRenderer.once('querySysConfig-reply', function (event, arg) {
         WorkStation: sysConfig.WorkStation,
         MachineId: sysConfig.MachineId,
         ip: sysConfig.PrintIP,
-        port: sysConfig.PrintPort
+        port: sysConfig.PrintPort,
+        PLCIP: sysConfig.PLCIP
     }
+    console.log('sysConfig:', sysConfig)
     store.commit('updateSysConfig', sysInfo)
+    check(sysInfo)
 })
 getSysInfo()
+
+//检查PLC tcp mes服务状态是否可用
+const check = function (sysConfig) {
+    console.log('do check')
+    if (sysConfig.ip != null && sysConfig.ip != '' && sysConfig.port != null) {
+        ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkTCPAddress, sysConfig.ip, sysConfig.port).then(res => {
+            //连接打印机
+            if (res.success) {
+                ipcRenderer.send('log-msg-info', 'connect Print Server')
+                hik.connectPrintServer(sysConfig.ip, sysConfig.port)
+                // ipcRenderer.invoke('connect-invoke', constant.sysOperate.connectPrintServer, sysConfig.PrintPort, sysConfig.PrintIP).then(res => {
+                //     console.log('connect Tcp Server:', res)
+                // })
+                store.commit('updatetcpStatus', true)
+                ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
+                // hik.sendToPrint('sss', 'ddd')
+            }
+        })
+    }
+    //10.69.156.101连接PLC之前需要检查PLC是否可以ping通，否则s7client持续write会卡死应用程序
+    if (sysConfig.PLCIP != null && sysConfig.PLCIP != '') {
+        ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkPLCAddress, sysConfig.PLCIP).then(res => {
+            if (res.success) {
+                ipcRenderer.invoke('connect-invoke', constant.sysOperate.connectPLC, sysConfig.PLCIP).then(res => {
+                    if (res.success) {
+                        store.commit('updateplcStatus', true)
+                        ipcRenderer.send('log-msg-info', 'updateplcStatus:' + store.state.plcStatus)
+                    }
+                })
+            }
+        })
+    }
+    //检测mes地址
+
+}
 
 onBeforeUnmount(() => {
     ipcRenderer.removeAllListeners(constant.mysql.queryByUser_reply)

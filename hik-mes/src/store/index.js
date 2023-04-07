@@ -7,13 +7,17 @@ const store = createStore({
             WorkStation: null,
             MachineId: null,
             ip: null,
-            port: null
+            port: null,
+            PLCIP: null
         },
         theme: 'white',
         role: null,
         name: null,
         updateMenu: false,
         workFlag: false,//系统开始工作标志
+        plcStatus: false,//plc连接状态
+        mesStatus: false,//mes连接状态
+        tcpStatus: false,//打印机连接状态
         mainMenus: [
             {
                 key: "/MainWindow",
@@ -72,6 +76,15 @@ const store = createStore({
         },
         updateworkFlag(state, workFlag) {
             state.workFlag = workFlag
+        },
+        updateplcStatus(state, plcStatus) {
+            state.plcStatus = plcStatus
+        },
+        updatemesStatus(state, mesStatus) {
+            state.mesStatus = mesStatus
+        },
+        updatetcpStatus(state, tcpStatus) {
+            state.tcpStatus = tcpStatus
         }
     },
     actions: {
