@@ -144,8 +144,8 @@ const check = function (sysConfig) {
     const mesPort = 12304
     ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkTCPAddress, mesIP, mesPort).then(res => {
         if (res.success) {
-            ipcRenderer.send('log-msg-info', 'test mes address ' + res)
-            store.commit('updatetcpStatus', true)
+            ipcRenderer.send('log-msg-info', 'test mes address ')
+            store.commit('updatemesStatus', true)
         }
     })
 }
