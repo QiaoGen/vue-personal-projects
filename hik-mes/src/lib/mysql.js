@@ -115,7 +115,7 @@ const initializeDB = function () {
 }
 
 const insertBarcd = function (param) {
-    log.info('insert Barcd: ' + param)
+    // log.info('insert Barcd: ' + param)
     return new Promise((resolve, reject) => {
         pool.execute(
             'insert into `barcd_list`(`Barcd`,`ValidStatus`, `Aufnr`) values(?,1,?)',
@@ -132,7 +132,7 @@ const insertBarcd = function (param) {
 }
 
 const insertAlarm = function (param) {
-    log.info('insert Alarm: ' + param)
+    // log.info('insert Alarm: ' + param)
     return new Promise((resolve, reject) => {
         pool.execute(
             'insert into `alarm`(`Content`) values(?)',
@@ -395,7 +395,7 @@ const searchBarcdList = function (param) {
             params.push(element)
         }
     });
-    log.info('select * from `barcd_list` where `Deleted` = 0 ' + part)
+    // log.info('select * from `barcd_list` where `Deleted` = 0 ' + part)
     return new Promise((resolve, reject) => {
         pool.execute(
             'select * from `barcd_list` where `Deleted` = 0 ' + part,

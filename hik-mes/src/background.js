@@ -22,14 +22,14 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  log.info('plc-msg-invoke:' + JSON.stringify(arg))
+  // log.info('plc-msg-invoke:' + JSON.stringify(arg))
   switch (arg[0]) {
     case 'read':
       try {
         await s7client.read(arg[1]).then(res => {
           result.success = true
           result.value = res
-          log.info(result)
+          // log.info(result)
         }).catch(err => {
           result.success = false
           result.value = err
@@ -65,7 +65,7 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
   log.info('mysql-msg-invoke:' + arg)
   switch (arg[0]) {
     case constant.mysql.insertBarcd:
-      log.info(JSON.parse(arg[1]))
+      // log.info(JSON.parse(arg[1]))
       await mysql.insertBarcd(JSON.parse(arg[1])).then(res => {
         result.msg = 'insert ' + arg[1] + ' success';
         result.value = res
@@ -94,7 +94,7 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
     success: true,
     msg: null
   }
-  log.info('mysql-msg:' + arg)
+  // log.info('mysql-msg:' + arg)
   switch (arg[0]) {
     case 'querySysConfig':
       mysql.querySysConfig().then(res => {
@@ -262,7 +262,7 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
 
 //日志数据
 ipcMain.on('logFile-msg', function (event, ...arg) {
-  log.info('logFile-msg:' + arg)
+  // log.info('logFile-msg:' + arg)
   switch (arg[0]) {
     case 'getLogFileList':
       logReader.getLogFileList(app.getPath('userData') + '/electron_log/app/').then(res => {

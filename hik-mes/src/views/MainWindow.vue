@@ -77,6 +77,7 @@ import store from '@/store'
 import constant from '@/lib/constant'
 import utils from '@/utils/utils'
 import soapClient from '@/lib/soapClient'
+import hik from '@/lib/hik'
 
 
 const { proxy: tthis } = getCurrentInstance()
@@ -163,13 +164,10 @@ const getWeight = function () {
             if (weightResult.success) {
                 let weightTemp = utils.getView(weightResult.value).getUint32()
                 weight.value = weightTemp / 1000
-                //是否满100箱数据
-                if (readyBarcdList.value.length >= 100 && weight.value != null) {
-                    generatePkgNumber()
-                }
                 addPkgNumberMsg('plc', '读取称重数据:' + weightTemp + 'g', 'info')
                 //称重标志位归位
                 resetWeightSign()
+
             }
         })
     })
@@ -196,6 +194,12 @@ function getUint8Array(len, setNum) {
 const flag = ref(true)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
+    // //是否满100箱数据
+    ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
+    ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
+    if (readyBarcdList.value.length >= 100 && weight.value != null) {
+        generatePkgNumber()
+    }
     let param = []
     let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
     if (tempList.length > 100) {
@@ -206,6 +210,7 @@ const generatePkgNumber = function () {
     }
     param.push({ Barcd: tempList[tempList.length - 1], PkgInfo: { Weigth: weight.value } })
     soapClient.sendPkgNumber(param).then(res => {
+        ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res)
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
         let param = []
@@ -217,19 +222,20 @@ const generatePkgNumber = function () {
         ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(param))
         addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
         addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')
-        readyToPrint(tempList[0].Aufnr, PkgNumber)
-        // resetWeightSign()
+        ipcRenderer.send('log-msg-info', 'ready to print: ')
+        readyToPrint(tempList[0].Aufnr, pkgNumber.value)
     }).catch(err => {
+        ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err)
         addPkgNumberMsg('mes', '获取集成码失败:' + err.ErrMsg, 'error')
         resetWeightSignError()
-        resetWeightSign()
-        console.error(err)
-        window.$message.error(err.ErrMsg)
+        // console.error(err)
+        // window.$message.error(err.ErrMsg)
     })
 }
 
 const readyToPrint = function (Aufnr, PkgNumber) {
-
+    ipcRenderer.send('log-msg-info', 'print: ' + Aufnr + ' ' + PkgNumber)
+    hik.sendToPrint(Aufnr, PkgNumber)
 }
 
 // console.log(Buffer.from([1]))
@@ -251,6 +257,7 @@ const catchBarcd = setInterval(() => {
     }
     catchBarcdFromPLC()
     getWeight()
+    generatePkgNumber()
 }, 1000)
 
 const catchBarcdFromPLC = function () {
