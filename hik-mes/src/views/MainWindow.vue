@@ -29,7 +29,7 @@
                     <div>集成码:</div>
                     <div class="result">{{ pkgNumber }}</div>
                     <div style="margin-bottom: 10px;">
-                        <n-button type="success">打印</n-button>
+                        <!-- <n-button type="success">打印</n-button> -->
                         <n-button @click="clearAll" style="margin-left: 10px;" type="error">清空缓存</n-button>
                     </div>
                     <div style="display: flex;align-items: center;margin-bottom: 10px;">
@@ -103,7 +103,7 @@ const mesValidMsg = ref(null)//mes校验结果
 //序列号验证状态
 const barcdStatus = ref(true)
 const pkgNumberStatus = ref(false)
-const printStatus = ref(false)
+
 
 const readyValidBarcd = ref([])//多选
 const readyBarcdList = ref([])
@@ -199,14 +199,13 @@ function getUint8Array(len, setNum) {
 const runFlag = ref(false)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
-    ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
-    ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
     ipcRenderer.send('log-msg-info', 'runFlag:' + runFlag.value)
     // //是否满100箱数据 //数量 >= 100 判断是否有重量 
     if (runFlag.value || readyBarcdList.value.length < 100 || weight.value == null) {
         return
     }
     runFlag.value = true
+    pkgNumberStatus.value = true
     ipcRenderer.send('log-msg-info', 'comming---------------package')
     let param = []
     let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
@@ -243,9 +242,13 @@ const generatePkgNumber = function () {
     })
 }
 
+//打印完成 清空pkgNumber/weight
 const readyToPrint = function (Aufnr, PkgNumber) {
     ipcRenderer.send('log-msg-info', 'print: ' + Aufnr + ' ' + PkgNumber)
     hik.sendToPrint(Aufnr, PkgNumber)
+    weight.value = null
+    pkgNumber.value = null
+    pkgNumberStatus.value = false
     runFlag.value = true
 }
 
@@ -271,9 +274,6 @@ const catchBarcd = setInterval(() => {
 }, 1000)
 
 const catchBarcdFromPLC = function () {
-    // if (!barcdStatus.value) {
-    //     return
-    // }
     addBarcdMsg('plc', '读取Barcd标识位', 'info')
     ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.barcdSign).then((result) => {
         // console.log(result)
@@ -289,7 +289,7 @@ const catchBarcdFromPLC = function () {
                 // console.log(res)
                 let barcdTemp = utils.transBarcd(res.value)
                 if (barcdTemp.length == 0 || barcdTemp == null) {
-                    addBarcdMsg('plc', '序列号为空', 'error')
+                    addBarcdMsg('plc', '序列号为空,请重新扫描', 'error')
                     plcBarcdSignError()
                     resetBarcdSign()
                 } else {
@@ -298,10 +298,10 @@ const catchBarcdFromPLC = function () {
                 }
             })
         }
-        // addBarcdToDB('dddfdfdfd')
     })
 }
 
+//入库前判断是否重复
 const addBarcdToDB = function (barcdTemp) {
     ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify([barcdTemp, null, null, null])).then(res => {
         // console.log(res)
@@ -320,30 +320,27 @@ const addBarcdToDB = function (barcdTemp) {
             } else {
                 validBarcd(barcdTemp)
             }
+        } else {
+            addBarcdMsg('sql', '数据库错误', 'error')
+            plcBarcdSignError()
+            resetBarcdSign()
         }
     })
-
-    // ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, barcdTemp).then(addRes => {
-    //     console.log(addRes)
-    //     if (addRes.success) {
-    //         barcd.value = barcdTemp
-    //         //mes校验序列号
-    //         validBarcd(barcdTemp)
-    //     } else {
-    //         if (addRes.msg.toString().indexOf('Duplicate entry') != -1) {
-    //             addBarcdMsg('plc', '序列号' + barcdTemp + '重复', 'error')
-    //             plcBarcdSignError()
-    //             resetBarcdSign()
-    //         }
-    //     }
-    // })
 }
-//验证操作
+//验证操作 /是否切单
 const validBarcd = function (barcd) {
     soapClient.valid(barcd).then(res => {
         // ipcRenderer.send('mysql-msg', 'updateBarcdValidStatus', param)
         mesValidMsg.value = '校验序列号:' + barcd + ":" + res.ErrMsg
         let aufnr = res.Data.Aufnr
+        if (readyBarcdList.value.length > 0) {
+            if (readyBarcdList.value[0].Aufnr != aufnr) {
+                plcBarcdSignError()
+                resetBarcdSign()
+                addBarcdMsg('mes', '序列号:' + barcd + ',订单号:' + aufnr + ' 与订单号:' + readyBarcdList.value[0] + ' 存在切单,请手动处理', 'error')
+                return
+            }
+        }
         ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd, aufnr])).then(addRes => {
             // console.log(addRes)
         })
@@ -410,7 +407,6 @@ function addPkgNumberMsg(type, msg, info) {
     lastPkgdMsg = msg
     if (info == 'error') {
         pkgNumberStatus.value = false
-        printStatus.value = false
     }
 }
 
@@ -444,7 +440,7 @@ ipcRenderer.on('deleteAllBarcd-reply', function (event, arg) {
     if (arg.success) {
         weight.value = null
         pkgNumber.value = null
-        pkgNumberStatus = null
+        pkgNumberStatus.value = null
     }
     window.$message.error(arg)
 })

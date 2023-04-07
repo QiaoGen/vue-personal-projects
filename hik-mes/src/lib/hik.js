@@ -31,7 +31,7 @@ client.on("data", function (data) {
 
 /* 监听end事件 */
 client.on("end", function () {
-    // store.commit('updatetcpStatus', false)
+    store.commit('updatetcpStatus', false)
     loggerIPC("disconect from Server");
 })
 

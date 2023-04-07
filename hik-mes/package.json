@@ -51,5 +51,17 @@
   ],
   "resolutions": {
     "vue-cli-plugin-electron-builder/electron-builder": "^23.0.3"
+  },
+  "win": {
+    "icon": "./public/sw.ico",
+    "artifactName": "海康烟感包装线",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "ia32"
+        ]
+      }
+    ]
   }
 }
