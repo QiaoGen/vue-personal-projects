@@ -138,6 +138,10 @@ const catchValidedBarcd = setInterval(() => {
         return
     }
     getReadyBarcdList()
+    if (!mesStatus.value || !tcpStatus.value) {
+        return
+    }
+    generatePkgNumber()
 }, 2000);
 
 //获取集成码数据
@@ -195,6 +199,9 @@ function getUint8Array(len, setNum) {
 const runFlag = ref(false)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
+    ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
+    ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
+    ipcRenderer.send('log-msg-info', 'runFlag:' + runFlag.value)
     if (runFlag) {
         return
     }
@@ -203,8 +210,6 @@ const generatePkgNumber = function () {
         return
     }
     runFlag.value = true
-    ipcRenderer.send('log-msg-info', 'generatePkgNumber current value:readyBarcdList-length' + readyBarcdList.value.length + ' weight:' + weight.value)
-    ipcRenderer.send('log-msg-info', 'generatePkgNumber condition:' + (readyBarcdList.value.length >= 100 && weight.value != null))
     let param = []
     let tempList = JSON.parse(JSON.stringify(readyBarcdList.value))
     if (tempList.length > 100) {
@@ -233,6 +238,7 @@ const generatePkgNumber = function () {
         ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err)
         addPkgNumberMsg('mes', '获取集成码失败:' + err.ErrMsg, 'error')
         resetWeightSignError()
+        runFlag.value = true
         // console.error(err)
         // window.$message.error(err.ErrMsg)
     })
@@ -241,6 +247,7 @@ const generatePkgNumber = function () {
 const readyToPrint = function (Aufnr, PkgNumber) {
     ipcRenderer.send('log-msg-info', 'print: ' + Aufnr + ' ' + PkgNumber)
     hik.sendToPrint(Aufnr, PkgNumber)
+    runFlag.value = true
 }
 
 // console.log(Buffer.from([1]))
@@ -262,7 +269,6 @@ const catchBarcd = setInterval(() => {
     }
     catchBarcdFromPLC()
     getWeight()
-    generatePkgNumber()
 }, 1000)
 
 const catchBarcdFromPLC = function () {
