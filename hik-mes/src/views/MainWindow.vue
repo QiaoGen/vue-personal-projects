@@ -308,13 +308,17 @@ const addBarcdToDB = function (barcdTemp) {
             if (res.value.length != 0) {
                 let repeatFlag = false
                 res.value.forEach(el => {
-                    repeatFlag = el.Deleted != 0 || el.PkgStatus == 0
+                    if (el.Deleted != 0 || el.PkgStatus == 0) {
+                        repeatFlag = true
+                    }
                 })
                 //重复
                 if (repeatFlag) {
                     addBarcdMsg('plc', '序列号' + barcdTemp + '重复', 'error')
                     plcBarcdSignError()
                     resetBarcdSign()
+                } else {
+                    validBarcd(barcdTemp)
                 }
             } else {
                 validBarcd(barcdTemp)
@@ -350,7 +354,7 @@ const validBarcd = function (barcd) {
         mesValidMsg.value = 'MES校验失败：' + err.ErrMsg + " Code:" + err.ErrCode
         plcBarcdSignError()
         resetBarcdSign()
-        addBarcdMsg('mes', err, 'error')
+        addBarcdMsg('mes', err.ErrMsg, 'error')
     })
 }
 
