@@ -2,7 +2,7 @@
   <n-layout has-sider class="menu">
     <!-- <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed" show-trigger
       @collapse="collapsed = true" @expand="collapsed = false"> -->
-    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed"
+    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="190" :collapsed="collapsed"
       @collapse="collapsed = true" @expand="collapsed = false">
       <div style="height: 100%;display: flex; flex-direction: column; justify-content: flex-start;">
         <div class="user">
@@ -43,6 +43,7 @@ import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20F
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
 import { ipcRenderer } from 'electron'
 import constant from '@/lib/constant';
+import hik from '@/lib/hik';
 
 const imgUrl = require('@/assets/hik.svg')
 

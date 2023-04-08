@@ -1,7 +1,7 @@
 <template>
     <div class="father" :style="{ backgroundImage: `url(${imgUrl})` }">
         <div class="login_window">
-            <div class="big_title">海康包装线登陆</div>
+            <div class="big_title">海康烟感包装线登陆</div>
             <n-form ref="formRef" :model="model" :rules="rules">
                 <n-form-item path="username" label="用户名：">
                     <n-input v-model:value="model.username" placeholder="请输入用户名" :maxlength="16"></n-input>

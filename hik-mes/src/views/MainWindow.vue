@@ -30,7 +30,9 @@
                     <div class="result">{{ pkgNumber }}</div>
                     <div style="margin-bottom: 10px;">
                         <!-- <n-button type="success">打印</n-button> -->
-                        <n-button @click="clearAll" style="margin-left: 10px;" type="error">清空缓存</n-button>
+                        <n-button @click="clearAll" type="error">清空缓存</n-button>
+                        <n-button @click="deleteValidBarcd" secondary :disabled="readyValidBarcd.length == 0" type="error"
+                            style="margin-left: 10px;">删除</n-button>
                     </div>
                     <div style="display: flex;align-items: center;margin-bottom: 10px;">
                         <div>集成码标志</div>
@@ -41,15 +43,16 @@
                 </div>
                 <div class="barch_f">
                     <div class="card_head">
-                        <div style="margin-right: 0px;margin-left: auto;">
+                        <div style="margin: 0 0 5px auto;">
                             <!-- <n-button @click="generatePkgNumber" secondary
                                 :disabled="readyValidBarcd.length == 0 || readyValidBarcd.length != 100" type="success"
                                 style="margin-right: 5px;margin-left: auto;">生成集成码</n-button> -->
                             <n-checkbox
                                 :checked="readyValidBarcd.length == readyBarcdList.length && readyBarcdList.length != 0"
                                 label="全选" @update:checked="selectAllReadyValidBarcd" style="margin-left: 11px;" />
-                            <n-button @click="deleteValidBarcd" secondary :disabled="readyValidBarcd.length == 0"
-                                type="error" style="margin-right: 5px;">删除</n-button>
+                            <!-- <n-button size="small" @click="deleteValidBarcd" secondary
+                                :disabled="readyValidBarcd.length == 0" type="error"
+                                style="margin-left: auto;margin-right: 0;">删除</n-button> -->
                         </div>
                     </div>
                     <n-checkbox-group v-model:value="readyValidBarcd" @update:value="selectReadyValidBarcd">
@@ -157,6 +160,7 @@ const getWeight = function () {
         // })
         if (!weightSignResult.success) {
             addPkgNumberMsg('plc', '读取称重标识位失败', 'error')
+            resetWeightSignError()
             return
         }
         if (weightSignResult.value[0] == 0) {
@@ -171,7 +175,6 @@ const getWeight = function () {
                 addPkgNumberMsg('plc', '读取称重数据:' + weightTemp + 'g', 'info')
                 //称重标志位归位
                 resetWeightSign()
-
             }
         })
     })
