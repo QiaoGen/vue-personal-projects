@@ -167,12 +167,23 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
     case 'updateBarcdPkgStatus':
       //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
       mysql.updateBarcdPkgStatus(JSON.parse(arg[1])).then(res => {
-        result.msg = '集成码入库成功'
+        result.msg = '修改包装状态成功'
         event.sender.send('updateBarcdPkgStatus-reply', result)
+      }).catch(err => {
+        result.msg = '修改包装状态失败'
+        result.success = false
+        event.sender.send('updateBarcdPkgStatus-reply', result)
+        log.error('数据库异常' + err)
+      })
+      break;
+    case 'insertPkgNumber':
+      mysql.insertPkgNumber(JSON.parse(arg[1])).then(res => {
+        result.msg = '集成码入库成功'
+        event.sender.send('insertPkgNumber-reply', result)
       }).catch(err => {
         result.msg = '集成码插入数据库失败'
         result.success = false
-        event.sender.send('updateBarcdPkgStatus-reply', result)
+        event.sender.send('insertPkgNumber-reply', result)
         log.error('数据库异常' + err)
       })
       break;

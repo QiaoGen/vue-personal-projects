@@ -147,6 +147,20 @@ const insertAlarm = function (param) {
         )
     })
 }
+const insertPkgNumber = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'insert into `pkg_number_list`(`PkgNumber`) values(?)',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(JSON.stringify(results))
+            }
+        )
+    })
+}
 
 const querySysConfig = function () {
     return new Promise((resolve, reject) => {
@@ -245,9 +259,10 @@ const updateBarcdPkgStatus = function (param) {
     for (let i = 1; i < param.length - 1; i++) {
         questionSign += ',?'
     }
+    log.info('updateBarcdPkgStatus param:' + param)
     return new Promise((resolve, reject) => {
         pool.execute(
-            'update `barcd_list` set `PkgStatus` = 1 , `PkgNumber` = ? where `Barcd` in (' + questionSign + ') ; insert into `pkg_number_list`(`PkgNumber`) values(?)',
+            'update `barcd_list` set `PkgStatus` = 1 , `PkgNumber` = ? where `Barcd` in (' + questionSign + ') and `Deleted` = 0',
             param,
             function (err, results, fields) {
                 if (err) {
@@ -414,6 +429,7 @@ export default {
     connect,
     insertBarcd,
     insertAlarm,
+    insertPkgNumber,
     querySysConfig,
     queryBarcdList,
     queryPkgNumberList,

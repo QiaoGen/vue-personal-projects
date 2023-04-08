@@ -199,7 +199,6 @@ function getUint8Array(len, setNum) {
 const runFlag = ref(false)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
-    ipcRenderer.send('log-msg-info', 'runFlag:' + runFlag.value)
     // //是否满100箱数据 //数量 >= 100 判断是否有重量 
     if (runFlag.value || readyBarcdList.value.length < 100 || weight.value == null) {
         return
@@ -226,7 +225,7 @@ const generatePkgNumber = function () {
         tempList.forEach(e => {
             sqlparam.push(e.Barcd)
         })
-        sqlparam.push(pkgNumber.value)
+        ipcRenderer.send('mysql-msg', 'insertPkgNumber', JSON.stringify([pkgNumber.value]))
         ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(sqlparam))
         addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
         addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')

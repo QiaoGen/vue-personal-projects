@@ -11,9 +11,12 @@
         </div>
         <n-menu accordion v-model:value="activeKey" :root-indent="36" :indent="12" :options="menuOptions"
           @update:value="selectMenu" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="22" />
-        <n-button type="error" v-if="!plcStatus" @click="reconnectPLC" class="err_btn">重连PLC</n-button>
-        <n-button type="error" v-if="!tcpStatus" @click="reconnectPrintServer" class="err_btn">重连打印机</n-button>
-        <n-button type="error" v-if="!mesStatus" @click="reConnect" class="err_btn">重新检测Mes地址</n-button>
+        <n-button type="error" v-if="!plcStatus" @click="reconnectPLC" class="err_btn"
+          :loading="plcLoading">重连PLC</n-button>
+        <n-button type="error" v-if="!tcpStatus" @click="reconnectPrintServer" class="err_btn"
+          :loading="tcpLoading">重连打印机</n-button>
+        <n-button type="error" v-if="!mesStatus" @click="reConnectMes" class="err_btn"
+          :loading="mesLoading">重新检测Mes地址</n-button>
         <!-- <div class="tip">
           <n-button dashed type="error">设备异常{{}}</n-button>
         </div> -->
@@ -38,14 +41,8 @@ import route from '@/router'
 import { NIcon } from 'naive-ui'
 import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
-import { useRoute } from "vue-router";
 import { ipcRenderer } from 'electron'
-
-const reConnectPLC = function () {
-  ipcRenderer.send('plc-msg', 'reconnectPLC')
-  // getPLCInfo()
-}
-
+import constant from '@/lib/constant';
 
 const imgUrl = require('@/assets/hik.svg')
 
@@ -69,8 +66,80 @@ const mesStatus = computed(() => {
 const tcpStatus = computed(() => {
   return store.state.tcpStatus
 })
+//按钮loading
+const plcLoading = ref(false)
+const tcpLoading = ref(false)
+const mesLoading = ref(false)
 
 
+const reconnectPLC = function () {
+  if (plcLoading.value) {
+    return
+  }
+  plcLoading.value = true
+  let PLCIP = store.state.sysConfig.PLCIP
+  if (PLCIP != null && PLCIP != '') {
+    ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkPLCAddress, PLCIP).then(res => {
+      if (res.success) {
+        ipcRenderer.invoke('connect-invoke', constant.sysOperate.connectPLC, PLCIP).then(res => {
+          if (res.success) {
+            store.commit('updateplcStatus', true)
+            ipcRenderer.send('log-msg-info', 'updateplcStatus:' + store.state.plcStatus)
+            plcLoading.value = false
+            window.$message.info('PLC连接成功')
+          }
+        })
+      } else {
+        plcLoading.value = false
+        window.$message.error('PLC地址:' + PLCIP + '无法ping通', { duration: 5e3 })
+      }
+    })
+  }
+}
+
+const reconnectPrintServer = function () {
+  if (tcpLoading.value) {
+    return
+  }
+  tcpLoading.value = true
+  let ip = store.state.sysConfig.ip
+  let port = store.state.sysConfig.port
+  if (ip != null && ip != '' && port != null) {
+    ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkTCPAddress, ip, port).then(res => {
+      //连接打印机
+      if (res.success) {
+        ipcRenderer.send('log-msg-info', 'connect Print Server')
+        hik.connectPrintServer(ip, port)
+        store.commit('updatetcpStatus', true)
+        ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
+        tcpLoading.value = false
+      } else {
+        tcpLoading.value = false
+        window.$message.error('当前打印机服务地址无效', { duration: 5e3 })
+      }
+    })
+  } else {
+    window.$message.error('请在「系统管理」中正确配置打印IP/端口', { duration: 5e3 })
+    tcpLoading.value = false
+  }
+}
+
+const reConnectMes = function () {
+  if (mesLoading.value) {
+    return
+  }
+  mesLoading.value = true
+  const mesIP = 'mes-expose.hikvision.com'
+  const mesPort = 12304
+  ipcRenderer.invoke('connect-invoke', constant.sysOperate.checkTCPAddress, mesIP, mesPort).then(res => {
+    if (res.success) {
+      ipcRenderer.send('log-msg-info', 'test mes address ')
+    } else {
+      window.$message.error('请检查MES服务地址:http://' + mesIP + ':' + mesPort + '是否指向正确的路由', { duration: 5e3 })
+      mesLoading.value = false
+    }
+  })
+}
 
 const selectMenu = function (key, item) {
   if (item.key === '/theme') {
