@@ -1,33 +1,33 @@
 <template>
-    <n-dialog-provider>
-      <n-message-provider>
-        <MessageApi />
-      </n-message-provider>
-      <n-config-provider style="height: 100%;" :theme="theme">
-      
+  <n-dialog-provider>
+    <n-message-provider>
+      <MessageApi />
+    </n-message-provider>
+    <n-config-provider :locale="zhCN" :date-locale="dateZhCN" style="height: 100%;">
+
       <div style="height: 100%;width: 100%;display: flex;">
         <!-- <router-view v-slot="{ Component }">
           <keep-alive>
             <component :is="Component" />
           </keep-alive>
         </router-view> -->
-        <home/>
+        <home />
 
       </div>
     </n-config-provider>
 
-    </n-dialog-provider>
+  </n-dialog-provider>
 </template>
 
 <script setup>
 import MessageApi from '@/components/uitls/MessageApi.vue';
-import { NMessageProvider,darkTheme } from "naive-ui";
+import { NMessageProvider, darkTheme } from "naive-ui";
 import { ref, computed } from 'vue';
 import store from '@/store'
 import Home from '@/views/Home.vue'
 // const theme = ref(darkTheme)
 const theme = computed(() => {
-  return store.state.theme === 'white'? null: darkTheme
+  return store.state.theme === 'white' ? null : darkTheme
 })
 
 </script>

@@ -67,6 +67,7 @@ const initializeDB = function () {
                     + '     Deleted int default 0 not null,'
                     + '     PrintStatus int default 0 null comment "0:未打印 1:已打印",'
                     + '     CreateTime timestamp default CURRENT_TIMESTAMP null,'
+                    + '     Aufnr varchar(30) null comment "订单号",'
                     + '     constraint pkg_number_list_Id_uindex'
                     + '         unique (Id)'
                     + ' )'
@@ -150,7 +151,7 @@ const insertAlarm = function (param) {
 const insertPkgNumber = function (param) {
     return new Promise((resolve, reject) => {
         pool.execute(
-            'insert into `pkg_number_list`(`PkgNumber`) values(?)',
+            'insert into `pkg_number_list`(`PkgNumber`,`Aufnr`) values(?,?)',
             param,
             function (err, results, fields) {
                 if (err) {
@@ -254,6 +255,22 @@ const queryPkgNumberList = function () {
     })
 }
 
+const queryUnPrintPkgNumber = function () {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            'SELECT * FROM `pkg_number_list` where `Deleted` = 0 and `PrintStatus` = 0 order by `CreateTime` desc',
+            function (err, results, fields) {
+                // log.info(results)
+                if (err) {
+                    reject(err)
+                }
+                // resolve(JSON.stringify(results))
+                resolve(results)
+            }
+        )
+    })
+}
+
 const updateBarcdPkgStatus = function (param) {
     let questionSign = '?'
     for (let i = 1; i < param.length - 1; i++) {
@@ -263,6 +280,21 @@ const updateBarcdPkgStatus = function (param) {
     return new Promise((resolve, reject) => {
         pool.execute(
             'update `barcd_list` set `PkgStatus` = 1 , `PkgNumber` = ? where `Barcd` in (' + questionSign + ') and `Deleted` = 0',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+const updatePkgNumberPrintStatus = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'update `pkg_number_list` set `PrintStatus` = 1 where `PkgNumber` = ? and `Aufnr` = ?  and `Deleted` = 0',
             param,
             function (err, results, fields) {
                 if (err) {
@@ -382,7 +414,21 @@ const updateSysConfig = function (param1) {
 const deleteAllBarcd = function () {
     return new Promise((resolve, reject) => {
         pool.execute(
-            'update `barcd_list` set `deleted` = 1',
+            'update `barcd_list` set `Deleted` = 1',
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+const deleteAllPkgNumber = function () {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'update `pkg_number_list` set `Deleted` = 1',
             function (err, results, fields) {
                 if (err) {
                     reject(err)
@@ -433,6 +479,7 @@ export default {
     querySysConfig,
     queryBarcdList,
     queryPkgNumberList,
+    queryUnPrintPkgNumber,
     queryReadyBarcdList,
     queryAllUser,
     queryByUser,
@@ -442,8 +489,10 @@ export default {
     updateBarcdDeleteStatus,
     updatePkgNumberDeleteStatus,
     updateBarcdPkgStatus,
+    updatePkgNumberPrintStatus,
     updateUser,
     deleteAllBarcd,
-    searchBarcdList
+    deleteAllPkgNumber,
+    searchBarcdList,
 
 }

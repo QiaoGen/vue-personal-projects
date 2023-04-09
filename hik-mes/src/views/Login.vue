@@ -116,13 +116,14 @@ const check = function (sysConfig) {
             //连接打印机
             if (res.success) {
                 ipcRenderer.send('log-msg-info', 'connect Print Server')
-                hik.connectPrintServer(sysConfig.ip, sysConfig.port)
-                // ipcRenderer.invoke('connect-invoke', constant.sysOperate.connectPrintServer, sysConfig.PrintPort, sysConfig.PrintIP).then(res => {
-                //     console.log('connect Tcp Server:', res)
-                // })
-                store.commit('updatetcpStatus', true)
-                ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
-                // hik.sendToPrint('sss', 'ddd')
+                hik.connectPrintServer(sysConfig.ip, sysConfig.port).then(res => {
+                    if (res.success) {
+                        store.commit('updatetcpStatus', true)
+                        ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
+                    }
+                }).catch(err => {
+                    ipcRenderer.send('log-msg-info', err.value)
+                })
             }
         })
     }

@@ -10,6 +10,9 @@ const mysql = {
     querySysConfig: 'querySysConfig',
     insertBarcd: 'insertBarcd',
     insertAlarm: 'insertAlarm',
+    deleteAllPkgNumber: 'deleteAllPkgNumber',
+    updatePkgNumberPrintStatus: 'updatePkgNumberPrintStatus',
+    queryUnPrintPkgNumber: 'queryUnPrintPkgNumber',
 }
 
 const sysOperate = {
@@ -152,6 +155,7 @@ const alarms = [
             "贴标机打印结束未检测到标签报警(2)",
             "贴标机取标后负压检测报警",
             "贴标机贴标板未检测到纸箱",
+            "贴标机打印机长时间无数据"
 
         ]
     }, {

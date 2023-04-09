@@ -110,10 +110,14 @@ const reconnectPrintServer = function () {
       //连接打印机
       if (res.success) {
         ipcRenderer.send('log-msg-info', 'connect Print Server')
-        hik.connectPrintServer(ip, port)
-        store.commit('updatetcpStatus', true)
-        ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
-        tcpLoading.value = false
+        hik.connectPrintServer(ip, port).then(res => {
+          store.commit('updatetcpStatus', true)
+          ipcRenderer.send('log-msg-info', 'updatetcpStatus:' + store.state.tcpStatus)
+          tcpLoading.value = false
+        }).catch(err => {
+          ipcRenderer.send('log-msg-info', 'connectPrintServer:' + err)
+        })
+
       } else {
         tcpLoading.value = false
         window.$message.error('当前打印机服务地址无效', { duration: 5e3 })

@@ -84,6 +84,36 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
         log.error('数据库异常' + err)
       })
       break;
+    case constant.mysql.deleteAllPkgNumber:
+      await mysql.deleteAllPkgNumber().then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.updatePkgNumberPrintStatus:
+      await mysql.updatePkgNumberPrintStatus(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.queryUnPrintPkgNumber:
+      await mysql.queryUnPrintPkgNumber().then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
   }
   return result
 })
@@ -131,15 +161,6 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
         log.error(err)
       })
       break;
-    // case 'updateBarcdValidStatus':
-    //   //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
-    //   mysql.updateBarcdValidStatus(JSON.parse(arg[1])).then(res => {
-    //     // event.sender.send('updateBarcdValidStatus-reply', res)
-    //   }).catch(err => {
-    //     event.sender.send('updateBarcdValidStatus-reply', '数据库异常')
-    //     log.error('数据库异常' + err)
-    //   })
-    //   break;
     case 'deleteBarcd':
       //传入参数不能以,[]分割,会被转义成array,只能拿到第一个入参参数
       mysql.updateBarcdDeleteStatus(JSON.parse(arg[1])).then(res => {

@@ -30,9 +30,14 @@
                     <div class="result">{{ pkgNumber }}</div>
                     <div style="margin-bottom: 10px;">
                         <!-- <n-button type="success">打印</n-button> -->
-                        <n-button @click="clearAll" type="error">清空缓存</n-button>
-                        <n-button @click="deleteValidBarcd" secondary :disabled="readyValidBarcd.length == 0" type="error"
-                            style="margin-left: 10px;">删除</n-button>
+                        <n-popconfirm positive-text="确认" negative-text="取消" @positive-click="clearAll">
+                            <template #trigger>
+                                <n-button type="error">清空缓存</n-button>
+                            </template>
+                            清空缓存将清除数据库以及页面所有数据，确认是否清除？
+                        </n-popconfirm>
+
+                        <n-button @click="reprint" dashed type="success" style="margin-left:5px">重新打印</n-button>
                     </div>
                     <div style="display: flex;align-items: center;margin-bottom: 10px;">
                         <div>集成码标志</div>
@@ -50,9 +55,9 @@
                             <n-checkbox
                                 :checked="readyValidBarcd.length == readyBarcdList.length && readyBarcdList.length != 0"
                                 label="全选" @update:checked="selectAllReadyValidBarcd" style="margin-left: 11px;" />
-                            <!-- <n-button size="small" @click="deleteValidBarcd" secondary
+                            <n-button size="small" @click="deleteValidBarcd" secondary
                                 :disabled="readyValidBarcd.length == 0" type="error"
-                                style="margin-left: auto;margin-right: 0;">删除</n-button> -->
+                                style="margin-left: auto;margin-right: 0;">删除</n-button>
                         </div>
                     </div>
                     <n-checkbox-group v-model:value="readyValidBarcd" @update:value="selectReadyValidBarcd">
@@ -69,6 +74,16 @@
             <message-window ref="weightMsgWindow" class="msg_window"></message-window>
             <!-- <n-switch v-model:value="flag"></n-switch> -->
         </div>
+
+        <n-modal v-model:show="showModel">
+            <n-card style="width: 700px" title="标签重打" :bordered="false" size="huge" role="dialog" aria-modal="true">
+                <template #header-extra>
+                    <n-button type="success" size="small" :disabled="checkedRowKeysRef.length == 0"
+                        @click="reprintActive">打印</n-button>
+                </template>
+                <n-data-table v-model:checked-row-keys="checkedRowKeysRef" :columns="columns" :data="pkgData" />
+            </n-card>
+        </n-modal>
     </div>
 </template>
 
@@ -82,6 +97,32 @@ import utils from '@/utils/utils'
 import soapClient from '@/lib/soapClient'
 import hik from '@/lib/hik'
 
+const show = ref(false)
+const showModel = ref(false)
+const printPkgNumber = ref(null)
+const pkgData = ref([])
+const checkedRowKeysRef = ref([])
+const columns = ref([
+    {
+        type: "selection",
+        multiple: false,
+    },
+    {
+        title: "包装号",
+        key: "PkgNumber"
+    },
+    {
+        title: "订单号",
+        key: "Aufnr"
+    },
+    {
+        title: "打印状态",
+        key: "PrintStatus"
+    }, {
+        title: "创建时间",
+        key: "CreateTime"
+    },
+])
 
 const { proxy: tthis } = getCurrentInstance()
 
@@ -228,7 +269,7 @@ const generatePkgNumber = function () {
         tempList.forEach(e => {
             sqlparam.push(e.Barcd)
         })
-        ipcRenderer.send('mysql-msg', 'insertPkgNumber', JSON.stringify([pkgNumber.value]))
+        ipcRenderer.send('mysql-msg', 'insertPkgNumber', JSON.stringify([pkgNumber.value, tempList[0].Aufnr]))
         ipcRenderer.send('mysql-msg', 'updateBarcdPkgStatus', JSON.stringify(sqlparam))
         addPkgNumberMsg('mes', '获取集成码:' + pkgNumber.value, 'info')
         addPkgNumberMsg('mes', '打印集成码准备:' + pkgNumber.value, 'info')
@@ -244,15 +285,94 @@ const generatePkgNumber = function () {
     })
 }
 
-//打印完成 清空pkgNumber/weight
+//打印完成 清空pkgNumber/weight 数据已经入库
+// {
+// "Barcd":"Q00726201",
+// "Result":"OK"
+// }
 const readyToPrint = function (Aufnr, PkgNumber) {
     ipcRenderer.send('log-msg-info', 'print: ' + Aufnr + ' ' + PkgNumber)
-    hik.sendToPrint(Aufnr, PkgNumber)
-    weight.value = null
-    pkgNumber.value = null
-    pkgNumberStatus.value = false
-    runFlag.value = true
+    hik.sendToPrint(Aufnr, PkgNumber).then(res => {
+        console.log(res)
+        ipcRenderer.send('log-msg-info', 'receive printer response:' + res)
+        if (res.success) {
+            let resp = JSON.parse(res.value.toString())
+            if (resp.Result == 'OK') {
+                addPkgNumberMsg('mes', '打印成功', 'info')
+                ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
+                    console.log(res)
+                }).catch(err => {
+                    console.error(err)
+                })
+            } else {
+                //需要人工干预
+                addPkgNumberMsg('mes', '打印失败:' + resp.Result + ' 序列号:' + resp.Barcd, 'error')
+                resetWeightSignError()
+            }
+        } else {
+            //未知错误处理,备用
+            let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
+            ipcRenderer.send('log-msg-info', errStr + res)
+            addPkgNumberMsg('mes', '打印标签失败: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + res.toString(), 'error')
+            resetWeightSignError()
+        }
+        weight.value = null
+        pkgNumber.value = null
+        pkgNumberStatus.value = false
+        runFlag.value = true
+    }).catch(err => {
+        let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
+        ipcRenderer.send('log-msg-info', errStr + err)
+        addPkgNumberMsg('mes', '打印标签异常: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + err.toString(), 'error')
+        resetWeightSignError()
+        weight.value = null
+        pkgNumber.value = null
+        pkgNumberStatus.value = false
+        runFlag.value = true
+    })
 }
+
+//重新打印
+const reprint = function () {
+
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryUnPrintPkgNumber).then(res => {
+        if (res.value.length == 0) {
+            window.$message.info('暂无打印失败集成码')
+            return
+        }
+        checkedRowKeysRef.value = []
+        showModel.value = true
+        let resData = []
+        res.value.forEach(e => {
+            let data = {
+                PkgNumber: e.PkgNumber,
+                Aufnr: e.Aufnr,
+                CreateTime: e.CreateTime,
+                PrintStatus: e.PrintStatus == 0 ? '未打印' : '已打印',
+                key: e.Id
+            }
+            resData.push(data)
+        })
+        pkgData.value = resData
+    }).catch(err => {
+        window.$message.error('获取未打印集成码失败')
+        console.error(err)
+    })
+}
+
+const reprintActive = function () {
+    let selectPkg = null
+    for (let i = 0; i < pkgData.value.length; i++) {
+        if (checkedRowKeysRef.value[0] == pkgData.value[i].key) {
+            selectPkg = pkgData.value[i]
+            break;
+        }
+    }
+    readyToPrint(selectPkg.Aufnr, selectPkg.PkgNumber)
+    showModel.value = false
+}
+
+
 
 // console.log(Buffer.from([1]))
 
@@ -435,7 +555,11 @@ const flushData = function () {
 
 //清空缓存
 const clearAll = function () {
+    show.value = false
     ipcRenderer.send('mysql-msg', 'deleteAllBarcd')
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.deleteAllPkgNumber).then(res => {
+    }).catch(err => {
+    })
 }
 
 //ipcRenderer.on
@@ -447,8 +571,11 @@ ipcRenderer.on('deleteAllBarcd-reply', function (event, arg) {
         weight.value = null
         pkgNumber.value = null
         pkgNumberStatus.value = null
+        window.$message.info('清除成功')
+    } else {
+        window.$message.error('清除失败')
     }
-    window.$message.error(arg)
+
 })
 //数据库异常返回
 ipcRenderer.on('updateBarcdValidStatus-reply', function (event, arg) {
@@ -465,10 +592,6 @@ ipcRenderer.on('deleteBarcd-reply', function (event, arg) {
         window.$message.error('序列号删除失败')
     }
 })
-
-
-
-
 
 onBeforeUnmount(() => {
     // ipcRenderer.removeAllListeners('queryReadyBarcdList-reply',
