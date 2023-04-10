@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref,h, computed, toRaw } from "vue";
+import { onBeforeUnmount, ref, h, computed, toRaw } from "vue";
 import { NInput } from 'naive-ui'
 import { ipcRenderer } from "electron";
 import constant from "@/lib/constant";
@@ -34,7 +34,7 @@ const columns = ref([
         }
       });
     }
-  },{
+  }, {
     title: "登录账号",
     key: "username",
     render(row, index) {
@@ -45,7 +45,7 @@ const columns = ref([
         }
       });
     }
-  },{
+  }, {
     title: "密码",
     key: "password",
     render(row, index) {
@@ -60,30 +60,30 @@ const columns = ref([
   },
 ])
 
-const getUser = function(){
-  ipcRenderer.send('mysql-msg',constant.mysql.queryAllUser)
+const getUser = function () {
+  ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryAllUser).then(res => {
+    console.log(res)
+    if (res.success) {
+      users.value = JSON.parse(JSON.stringify(res.value))
+      let temp = []
+      res.value.forEach(el => {
+        if (el.role >= role.value) {
+          temp.push(el)
+        }
+      })
+      data.value = temp
+    }
+  })
 }
-ipcRenderer.on(constant.mysql.queryAllUser_reply,function(event, arg){
-  if(arg.success){
-    users.value = JSON.parse(JSON.stringify(arg.msg))
-    let temp = []
-    arg.msg.forEach(el => {
-      if(el.role >= role.value){
-        temp.push(el)
-      }
-    })
-    data.value = temp
-  }
-})
 
 getUser()
 
-const updateUser = function(){
+const updateUser = function () {
   data.value.forEach(e => {
     users.value.forEach(i => {
-      if(e.id == i.id){
-        if(compare(e,i)){
-          
+      if (e.id == i.id) {
+        if (compare(e, i)) {
+
           updateUserSql(e)
         }
       }
@@ -91,29 +91,26 @@ const updateUser = function(){
   })
 }
 
-const updateUserSql = function(user){
+const updateUserSql = function (user) {
   let param = [user.name, user.username, user.password, user.id]
-  ipcRenderer.send('mysql-msg',constant.mysql.updateUser,JSON.stringify(param))
-}
-ipcRenderer.on(constant.mysql.updateUser_reply,function(event, arg){
-  if(arg.success){
-    window.$message.success('更新成功,即将跳转登陆页面重新登陆')
-    setTimeout(() => {
-      route.replace('/login')
-    }, 1500);
-  }else{
+  ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updateUser, JSON.stringify(param)).then(res => {
+    if (res.success) {
+      window.$message.success('更新成功,即将跳转登陆页面重新登陆')
+      setTimeout(() => {
+        route.replace('/login')
+      }, 1500);
+    } else {
       window.$message.error('更新失败,请检查用户名是否重复')
       getUser()
-  }
-})
-
-const compare = function(e, i){
-  return e.name != i.name || e.password != i.password || e.username != i.username
+    }
+  }).catch(err => {
+    ipcRenderer.send('log-msg-info', 'update user fail' + err)
+  })
 }
 
-onBeforeUnmount(() => {
-  ipcRenderer.removeAllListeners(constant.mysql.queryAllUser_reply, constant.mysql.updateUser_reply)
-})
+const compare = function (e, i) {
+  return e.name != i.name || e.password != i.password || e.username != i.username
+}
 
 </script>
 
@@ -122,7 +119,8 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
 }
-.content{
+
+.content {
   display: flex;
   flex-direction: column;
 }

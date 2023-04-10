@@ -114,6 +114,26 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
         log.error('数据库异常' + err)
       })
       break;
+    case constant.mysql.queryAllUser:
+      await mysql.queryAllUser().then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.updateUser:
+      await mysql.updateUser(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
   }
   return result
 })
@@ -228,30 +248,6 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
         result.msg = err
         result.success = false
         event.sender.send(constant.mysql.searchBarcdList_reply, result)
-        log.error('数据库异常' + err)
-      })
-      break;
-    case constant.mysql.queryAllUser:
-      mysql.queryAllUser().then(res => {
-        result.success = true
-        result.msg = res
-        event.sender.send(constant.mysql.queryAllUser_reply, result)
-      }).catch(err => {
-        result.msg = err
-        result.success = false
-        event.sender.send(constant.mysql.queryAllUser_reply, result)
-        log.error('数据库异常' + err)
-      })
-      break;
-    case constant.mysql.updateUser:
-      mysql.updateUser(JSON.parse(arg[1])).then(res => {
-        result.success = true
-        result.msg = res
-        event.sender.send(constant.mysql.updateUser_reply, result)
-      }).catch(err => {
-        result.msg = err
-        result.success = false
-        event.sender.send(constant.mysql.updateUser_reply, result)
         log.error('数据库异常' + err)
       })
       break;
