@@ -188,6 +188,7 @@ const catchValidedBarcd = setInterval(() => {
     generatePkgNumber()
 }, 2000);
 
+// const getWeightFlag = ref(false)
 //获取集成码数据
 const getWeight = function () {
     //获取称重数据
@@ -290,6 +291,7 @@ const generatePkgNumber = function () {
 // "Barcd":"Q00726201",
 // "Result":"OK"
 // }
+// todo tcpServer未能及时返回数据?
 const readyToPrint = function (Aufnr, PkgNumber) {
     ipcRenderer.send('log-msg-info', 'print: ' + Aufnr + ' ' + PkgNumber)
     hik.sendToPrint(Aufnr, PkgNumber).then(res => {
@@ -300,21 +302,25 @@ const readyToPrint = function (Aufnr, PkgNumber) {
             if (resp.Result == 'OK') {
                 addPkgNumberMsg('mes', '打印成功', 'info')
                 ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
-                    console.log(res)
                 }).catch(err => {
-                    console.error(err)
                 })
             } else {
                 //需要人工干预
                 addPkgNumberMsg('mes', '打印失败:' + resp.Result + ' 序列号:' + resp.Barcd, 'error')
                 resetWeightSignError()
             }
-        } else {
-            //未知错误处理,备用
+        } else if (res.success == false) {
+            //返回错误数据
             let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
             ipcRenderer.send('log-msg-info', errStr + JSON.stringify(res))
             addPkgNumberMsg('mes', '打印标签失败: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + JSON.stringify(res), 'error')
             resetWeightSignError()
+        } else {
+            // 超时返回 放行
+            addPkgNumberMsg('mes', '打印成功', 'info')
+            ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
+            }).catch(err => {
+            })
         }
         weight.value = null
         pkgNumber.value = null
@@ -334,10 +340,9 @@ const readyToPrint = function (Aufnr, PkgNumber) {
 
 //重新打印
 const reprint = function () {
-
-    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryUnPrintPkgNumber).then(res => {
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryPkgNumberLimit).then(res => {
         if (res.value.length == 0) {
-            window.$message.info('暂无打印失败集成码')
+            window.$message.info('暂无集成码数据')
             return
         }
         checkedRowKeysRef.value = []
@@ -355,7 +360,7 @@ const reprint = function () {
         })
         pkgData.value = resData
     }).catch(err => {
-        window.$message.error('获取未打印集成码失败')
+        window.$message.error('获取集成码失败')
         console.error(err)
     })
 }
@@ -368,7 +373,20 @@ const reprintActive = function () {
             break;
         }
     }
-    readyToPrint(selectPkg.Aufnr, selectPkg.PkgNumber)
+    // readyToPrint(selectPkg.Aufnr, selectPkg.PkgNumber)
+    addPkgNumberMsg('mes', '重新打印：' + selectPkg.PkgNumber + ' ' + selectPkg.Aufnr, 'info')
+    let PkgNumber = selectPkg.PkgNumber
+    let Aufnr = selectPkg.Aufnr
+    if (tcpStatus.value == false) {
+        window.$message.error("当前打印服务已断开,检查连接之后再执行")
+        return
+    }
+    hik.sendToPrint(Aufnr, PkgNumber).then(res => {
+        console.log('reprint res:' + JSON.stringify(res))
+        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
+        }).catch(err => {
+        })
+    })
     showModel.value = false
 }
 

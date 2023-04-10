@@ -255,10 +255,10 @@ const queryPkgNumberList = function () {
     })
 }
 
-const queryUnPrintPkgNumber = function () {
+const queryPkgNumberLimit = function () {
     return new Promise((resolve, reject) => {
         pool.query(
-            'SELECT * FROM `pkg_number_list` where `Deleted` = 0 and `PrintStatus` = 0 order by `CreateTime` desc',
+            'SELECT * FROM `pkg_number_list` where `Deleted` = 0 order by `CreateTime` desc limit 10',
             function (err, results, fields) {
                 // log.info(results)
                 if (err) {
@@ -479,7 +479,7 @@ export default {
     querySysConfig,
     queryBarcdList,
     queryPkgNumberList,
-    queryUnPrintPkgNumber,
+    queryPkgNumberLimit,
     queryReadyBarcdList,
     queryAllUser,
     queryByUser,

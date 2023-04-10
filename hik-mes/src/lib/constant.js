@@ -12,7 +12,7 @@ const mysql = {
     insertAlarm: 'insertAlarm',
     deleteAllPkgNumber: 'deleteAllPkgNumber',
     updatePkgNumberPrintStatus: 'updatePkgNumberPrintStatus',
-    queryUnPrintPkgNumber: 'queryUnPrintPkgNumber',
+    queryPkgNumberLimit: 'queryPkgNumberLimit',
 }
 
 const sysOperate = {

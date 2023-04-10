@@ -48,7 +48,7 @@ var sendToPrint = async function (Aufnr, PkgNumber) {
         client.write(paramArray)
         setTimeout(() => {
             reslove(result)
-        }, 1000);
+        }, 1500);
     })
 }
 

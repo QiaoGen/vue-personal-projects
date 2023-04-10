@@ -104,8 +104,8 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
         log.error('数据库异常' + err)
       })
       break;
-    case constant.mysql.queryUnPrintPkgNumber:
-      await mysql.queryUnPrintPkgNumber().then(res => {
+    case constant.mysql.queryPkgNumberLimit:
+      await mysql.queryPkgNumberLimit().then(res => {
         result.success = true
         result.value = res
       }).catch(err => {
