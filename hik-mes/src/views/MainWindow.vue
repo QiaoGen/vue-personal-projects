@@ -312,8 +312,8 @@ const readyToPrint = function (Aufnr, PkgNumber) {
         } else {
             //未知错误处理,备用
             let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
-            ipcRenderer.send('log-msg-info', errStr + res)
-            addPkgNumberMsg('mes', '打印标签失败: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + res.toString(), 'error')
+            ipcRenderer.send('log-msg-info', errStr + JSON.stringify(res))
+            addPkgNumberMsg('mes', '打印标签失败: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + JSON.stringify(res), 'error')
             resetWeightSignError()
         }
         weight.value = null
@@ -323,7 +323,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
     }).catch(err => {
         let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
         ipcRenderer.send('log-msg-info', errStr + err)
-        addPkgNumberMsg('mes', '打印标签异常: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + err.toString(), 'error')
+        addPkgNumberMsg('mes', '打印标签异常: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + JSON.stringify(err), 'error')
         resetWeightSignError()
         weight.value = null
         pkgNumber.value = null
