@@ -39,7 +39,7 @@ import store from '@/store'
 import { ref, h, toRaw, computed, watch } from "vue";
 import route from '@/router'
 import { NIcon } from 'naive-ui'
-import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled } from "@vicons/fluent"
+import { Accessibility20Filled, AlignRight20Filled, Settings20Filled, Library20Filled, BookInformation20Filled, ClockAlarm20Filled, Box20Filled } from "@vicons/fluent"
 import { MdHelpCircle, MdExit } from '@vicons/ionicons4'
 import { ipcRenderer } from 'electron'
 import constant from '@/lib/constant';
@@ -165,7 +165,7 @@ var iconMap = new Map([
   ['/SysManager', Settings20Filled],
   ['/DataReport', Library20Filled],
   ['/UserManage', Accessibility20Filled],
-  // ['/theme', Color20Filled],
+  ['/SendBox', Box20Filled],
   ['/Help', MdHelpCircle],
   ['/log', BookInformation20Filled],
 ])

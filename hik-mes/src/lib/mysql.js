@@ -103,7 +103,17 @@ const initializeDB = function () {
                     + '         primary key (id)'
                     + ' )'
                     + ' comment "异常告警";create index index_alarm_time on alarm(CreateTime);'
-                    ,
+                    + ' create table send_box '
+                    + ' ( '
+                    + '     Id int auto_increment '
+                    + '         primary key, '
+                    + '     Num int null, '
+                    + '     Aufnr varchar(30) null, '
+                    + '     CreateTime timestamp default CURRENT_TIMESTAMP null, '
+                    + '     constraint send_box_Aufnr_uindex '
+                    + '         unique (Aufnr) '
+                    + ' ) '
+                    + ' comment 投盒机数量映射"; ',
                     function (err, results, fields) {
                         if (err) {
                             log.error(err)
@@ -210,6 +220,36 @@ const queryReadyBarcdList = function () {
     })
 }
 
+const querySendBox = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            'select * from `send_box` order by `CreateTime` desc limit ? offset ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+const querySendBoxByAufnr = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            'select * from `send_box` where Aufnr = ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
 const queryAllUser = function () {
     return new Promise((resolve, reject) => {
         pool.query(
@@ -228,6 +268,35 @@ const queryByUser = function (param) {
     return new Promise((resolve, reject) => {
         pool.query(
             'select * from `user` where `username` = ? and `password` = ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+const countSendBox = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            'select count(1) as `total` from `send_box` ',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+const insertAndUpdateSendBox = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            'insert into send_box(Aufnr, Num) values (?,?) ON DUPLICATE KEY UPDATE Aufnr = values(Aufnr), Num = values(Num)',
             param,
             function (err, results, fields) {
                 if (err) {
@@ -481,8 +550,12 @@ export default {
     queryPkgNumberList,
     queryPkgNumberLimit,
     queryReadyBarcdList,
+    querySendBox,
+    querySendBoxByAufnr,
     queryAllUser,
     queryByUser,
+    countSendBox,
+    insertAndUpdateSendBox,
     updateSysConfig,
     updatePkgNumberList,
     // updateBarcdValidStatus,

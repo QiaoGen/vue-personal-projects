@@ -28,6 +28,10 @@ const store = createStore({
                 label: "异常告警",
             },
             {
+                key: "/SendBox",
+                label: "投盒机"
+            },
+            {
                 key: "/SysManager",
                 label: "系统管理",
                 authorization: [0]

@@ -11,6 +11,7 @@
               <component :is="Component" :alarms="alarms" />
             </keep-alive>
           </router-view>
+          <!-- <router-view /> -->
         </n-layout>
       </div>
       <div style="height: 30px;width: 100%;"></div>

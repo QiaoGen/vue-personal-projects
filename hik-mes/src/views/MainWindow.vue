@@ -75,13 +75,24 @@
             <!-- <n-switch v-model:value="flag"></n-switch> -->
         </div>
 
-        <n-modal v-model:show="showModel">
+        <n-modal v-model:show="showModal">
             <n-card style="width: 700px" title="标签重打" :bordered="false" size="huge" role="dialog" aria-modal="true">
                 <template #header-extra>
                     <n-button type="success" size="small" :disabled="checkedRowKeysRef.length == 0"
                         @click="reprintActive">打印</n-button>
                 </template>
                 <n-data-table v-model:checked-row-keys="checkedRowKeysRef" :columns="columns" :data="pkgData" />
+            </n-card>
+        </n-modal>
+
+        <n-modal close-on-esc="false" style="width: 550px;" :show="showModalBox">
+            <n-card style="width: 600px" title="投盒机" size="huge" :bordered="false" role="dialog" aria-modal="true">
+                确保生产过程正常进行，请维护投盒机「订单号」对应「标签数量」
+                <template #footer>
+                    <n-button type="success" size="small" @click="skipSendBox">
+                        去配置
+                    </n-button>
+                </template>
             </n-card>
         </n-modal>
     </div>
@@ -96,9 +107,11 @@ import constant from '@/lib/constant'
 import utils from '@/utils/utils'
 import soapClient from '@/lib/soapClient'
 import hik from '@/lib/hik'
+import route from '@/router'
 
+const showModalBox = ref(true)
 const show = ref(false)
-const showModel = ref(false)
+const showModal = ref(false)
 const printPkgNumber = ref(null)
 const pkgData = ref([])
 const checkedRowKeysRef = ref([])
@@ -346,7 +359,7 @@ const reprint = function () {
             return
         }
         checkedRowKeysRef.value = []
-        showModel.value = true
+        showModal.value = true
         let resData = []
         res.value.forEach(e => {
             let data = {
@@ -387,7 +400,7 @@ const reprintActive = function () {
         }).catch(err => {
         })
     })
-    showModel.value = false
+    showModal.value = false
 }
 
 
@@ -611,34 +624,17 @@ ipcRenderer.on('deleteBarcd-reply', function (event, arg) {
     }
 })
 
+//额外操作
+const skipSendBox = function () {
+    showModalBox.value = false
+    route.replace('/SendBox')
+}
+
 onBeforeUnmount(() => {
-    // ipcRenderer.removeAllListeners('queryReadyBarcdList-reply',
-    //  'deleteBarcd-reply', 
-    //  'updateBarcdPkgStatus-reply',
-    //  'updateBarcdValidStatus-reply',
-    //  'deleteAllBarcd-reply',
-    // //  constant.plcCommand.barcdSign.reply,
-    // 'barcdSign_reply',
-    //  constant.plcCommand.barcd.reply,
-    //  constant.mysql.insertBarcd_reply
-    //  )
     ipcRenderer.removeAllListeners()
     clearInterval(catchBarcd)
     clearInterval(catchValidedBarcd)
 })
-// onDeactivated(() => {
-//     ipcRenderer.removeAllListeners('queryReadyBarcdList-reply',
-//      'deleteBarcd-reply',
-//      'updateBarcdPkgStatus-reply',
-//      'updateBarcdValidStatus-reply',
-//      'deleteAllBarcd-reply',
-//      constant.plcCommand.barcdSign.reply,
-//      constant.plcCommand.barcd.reply,
-//      constant.mysql.insertBarcd_reply
-//      )
-//     clearInterval(catchBarcd)
-//     clearInterval(catchValidedBarcd)
-// })
 
 </script>
 

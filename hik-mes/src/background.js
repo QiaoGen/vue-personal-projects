@@ -134,6 +134,46 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
         log.error('数据库异常' + err)
       })
       break;
+    case constant.mysql.querySendBox:
+      await mysql.querySendBox(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.countSendBox:
+      await mysql.countSendBox().then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.insertAndUpdateSendBox:
+      await mysql.insertAndUpdateSendBox(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
+    case constant.mysql.querySendBoxByAufnr:
+      await mysql.querySendBoxByAufnr(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
   }
   return result
 })

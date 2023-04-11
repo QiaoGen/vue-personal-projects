@@ -13,6 +13,10 @@ const mysql = {
     deleteAllPkgNumber: 'deleteAllPkgNumber',
     updatePkgNumberPrintStatus: 'updatePkgNumberPrintStatus',
     queryPkgNumberLimit: 'queryPkgNumberLimit',
+    querySendBox: 'querySendBox',
+    countSendBox: 'countSendBox',
+    insertAndUpdateSendBox: 'insertAndUpdateSendBox',
+    querySendBoxByAufnr: 'querySendBoxByAufnr',
 }
 
 const sysOperate = {
@@ -228,6 +232,7 @@ const plcCommand = {
     barcd: { area: areas.DB, dbNumber: 16, start: 0, size: 20, desc: '序列号', name: 'barcd' },//size => byte
     weightSign: { area: areas.M, wordLen: wordLens.bit, start: 4808, amount: 1, desc: '称重标识位', name: 'weightSign' },
     weight: { area: areas.M, wordLen: wordLens.byte, start: 700, amount: 4, desc: '称重数据', name: 'weight' },
+    boxBook: { area: areas.M, wordLen: wordLens.byte, start: 704, amount: 2, desc: '放置数量', name: 'boxBook' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
 }

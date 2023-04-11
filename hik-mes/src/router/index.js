@@ -10,6 +10,10 @@ const routes = [
     name: 'MainWindow',
     component: () => import('@/views/MainWindow.vue')
   }, {
+    path: '/SendBox',
+    name: 'SendBox',
+    component: () => import('@/views/SendBox.vue')
+  }, {
     path: '/Alarm',
     name: 'Alarm',
     component: () => import('@/views/Alarm.vue')
