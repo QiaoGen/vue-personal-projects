@@ -1,6 +1,7 @@
 import net from 'net'
 import store from '@/store'
 import { computed, watch } from 'vue'
+import { ipcRenderer } from 'electron'
 
 var client = new net.Socket()
 
@@ -18,6 +19,7 @@ const connectPrintServer = function (ip, port) {
         client.connect(port, ip, function () {
             result.success = true
             result.value = 'connect ' + ip + ':' + port + ' success'
+            ipcRenderer.send('log-msg-info', 'connect to TCP Server')
             reslove(result)
         })
         setTimeout(() => {
@@ -25,6 +27,7 @@ const connectPrintServer = function (ip, port) {
                 success: false,
                 value: 'connect tcp fail'
             }
+            ipcRenderer.send('log-msg-info', 'connect to TCP Server failed')
             reject(result)
         }, 2000);
     })
@@ -58,11 +61,13 @@ client.on("data", function (data) {
         success: true,
         value: data
     }
+    ipcRenderer.send('log-msg-info', 'TCP receive data: ' + data.toString())
 })
 
 /* 监听end事件 */
 client.on("end", function () {
     store.commit('updatetcpStatus', false)
+    ipcRenderer.send('log-msg-info', 'disconnect TCP Server')
 })
 
 /* 监听异常 */

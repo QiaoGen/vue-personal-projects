@@ -22,7 +22,7 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  log.info('plc-msg-invoke:' + JSON.stringify(arg))
+  // log.info('plc-msg-invoke:' + JSON.stringify(arg))
   switch (arg[0]) {
     case 'read':
       try {
@@ -47,7 +47,6 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
       }).catch(err => {
         result.success = false
         result.value = err
-        log.info(1)
       })
       break;
   }
@@ -63,7 +62,7 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  log.info('mysql-msg-invoke:' + arg)
+  // log.info('mysql-msg-invoke:' + arg)
   switch (arg[0]) {
     case constant.mysql.insertBarcd:
       // log.info(JSON.parse(arg[1]))
@@ -195,7 +194,7 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
     success: true,
     msg: null
   }
-  log.info('mysql-msg:' + arg)
+  // log.info('mysql-msg:' + arg)
   switch (arg[0]) {
     case 'querySysConfig':
       mysql.querySysConfig().then(res => {

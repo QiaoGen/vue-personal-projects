@@ -191,16 +191,10 @@ const selectAllReadyValidBarcd = function (e) {
 
 //获取已验证序列号
 const catchValidedBarcd = setInterval(() => {
-    ipcRenderer.send('log-msg-info', 'workFlag:' + workFlag.value)
     if (!workFlag.value) {
         return
     }
     getReadyBarcdList()
-    console.log('------------------')
-    console.log(tcpStatus.value)
-    console.log(mesStatus.value)
-    ipcRenderer.send('log-msg-info', 'mesStatus.value == false || tcpStatus.value == false:' + (!mesStatus.value || !tcpStatus.value))
-    ipcRenderer.send('log-msg-info', 'mesStatus.value == false || tcpStatus.value == false:' + (mesStatus.value == false || tcpStatus.value == false))
     if (mesStatus.value == false || tcpStatus.value == false) {
         return
     }
@@ -264,7 +258,6 @@ const runFlag = ref(false)
 //生成集成码 截取前100条数据
 const generatePkgNumber = function () {
     // //是否满100箱数据 //数量 >= 100 判断是否有重量 
-    ipcRenderer.send('log-msg-info', 'enter package ?:' + runFlag.value + ' ' + (readyBarcdList.value.length < 100 || weight.value == null))
     if (runFlag.value || readyBarcdList.value.length < 100 || weight.value == null) {
         return
     }
@@ -376,7 +369,6 @@ const endPkgNumberTask = function () {
     pkgNumberStatus.value = false
     pkgNumber.value = null
     ipcRenderer.send('log-msg-info', 'exit---------------package')
-    ipcRenderer.send('log-msg-info', 'task generatePkgNumber done reset the running flag')
 }
 
 //重新打印
