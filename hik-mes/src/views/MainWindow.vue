@@ -371,7 +371,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
 }
 
 const endPkgNumberTask = function () {
-    runFlag.value = true
+    runFlag.value = false
     weight.value = null
     pkgNumberStatus.value = false
     pkgNumber.value = null
