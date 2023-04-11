@@ -22,7 +22,7 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
     msg: null,
     value: null
   }
-  // log.info('plc-msg-invoke:' + JSON.stringify(arg))
+  log.info('plc-msg-invoke:' + JSON.stringify(arg))
   switch (arg[0]) {
     case 'read':
       try {
@@ -195,7 +195,7 @@ ipcMain.on('mysql-msg', function (event, ...arg) {
     success: true,
     msg: null
   }
-  // log.info('mysql-msg:' + arg)
+  log.info('mysql-msg:' + arg)
   switch (arg[0]) {
     case 'querySysConfig':
       mysql.querySysConfig().then(res => {

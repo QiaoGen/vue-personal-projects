@@ -291,7 +291,7 @@ const generatePkgNumber = function () {
         }).catch(err => {
             console.error(err)
         })
-        ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res)
+        ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res.toString())
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
         let sqlparam = []
@@ -306,7 +306,7 @@ const generatePkgNumber = function () {
         ipcRenderer.send('log-msg-info', 'ready to print: ')
         readyToPrint(tempList[0].Aufnr, pkgNumber.value)
     }).catch(err => {
-        ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err)
+        ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err.toString())
         addPkgNumberMsg('mes', '获取集成码失败:' + err.ErrMsg, 'error')
         resetWeightSignError()
         runFlag.value = true
