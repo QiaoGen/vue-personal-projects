@@ -11,6 +11,13 @@ const fullBinary = function (param) {
 const toInt32 = function (buffer) {
     return getView(buffer).getUint32()
 }
+//转化16位int
+const toInt16 = function (buffer) {
+    return getView(buffer).getUint16()
+}
+function getInt16Bytes(num) {
+    return getUint8Array(2, function (view) { view.setInt16(0, num); })
+}
 
 function getView(bytes) {
     var view = new DataView(new ArrayBuffer(bytes.length));
@@ -28,7 +35,7 @@ function getUint8Array(len, setNum) {
 }
 
 //转化序列号 去除前两个字节 0的字节去除
-function transBarcd(param){
+function transBarcd(param) {
     // let array = new Uint8Array([254,  9, 75, 55, 48, 54, 57,
     //     53, 49, 55, 54,  0,  0,  0,
     //      0,  0,  0,  0,  0,  0])
@@ -36,8 +43,8 @@ function transBarcd(param){
     //         56, 57, 55, 54,  0,  0,  0,
     //          0,  0,  0,  0,  0,  0])
     let result = ''
-    for(let i = 2; i < param.length; i++){
-        if(param[i] == 0){
+    for (let i = 2; i < param.length; i++) {
+        if (param[i] == 0) {
             break;
         }
         result += String.fromCharCode(param[i])
@@ -45,9 +52,11 @@ function transBarcd(param){
     return result
 }
 
-export default{
+export default {
     toInt32,
+    toInt16,
     fullBinary,
     getView,
-    transBarcd
+    transBarcd,
+    getInt16Bytes,
 }

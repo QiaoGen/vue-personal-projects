@@ -275,6 +275,22 @@ const generatePkgNumber = function () {
     param.push({ Barcd: tempList[tempList.length - 1].Barcd, PkgInfo: { Weigth: weight.value } })
     ipcRenderer.send('log-msg-info', 'param pkg:' + JSON.stringify(param))
     soapClient.sendPkgNumber(param).then(res => {
+        //投盒数量查询 未查询到数据继续走流程 投盒机报警
+        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.querySendBoxByAufnr, JSON.stringify([tempList[0].Aufnr])).then(res => {
+            console.log('send box match num:', res.value)
+            if (res.value.length == 0) {
+                ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.sendBox, Buffer.from([0, 0])).then(res => {
+                    addPkgNumberMsg('mes', '未查询到投盒机匹配订单号:' + tempList[0].Aufnr, 'error')
+                })
+            } else {
+                let num = res.value[0].Num
+                ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.sendBox, utils.getInt16Bytes(num)).then(res => {
+                    addPkgNumberMsg('mes', '投盒机匹配订单号:' + tempList[0].Aufnr + ' 数量：' + num, 'info')
+                })
+            }
+        }).catch(err => {
+            console.error(err)
+        })
         ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res)
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
@@ -395,7 +411,9 @@ const reprintActive = function () {
         return
     }
     hik.sendToPrint(Aufnr, PkgNumber).then(res => {
-        console.log('reprint res:' + JSON.stringify(res))
+        console.log('reprint res:' + res)
+        let msg = res.value != "" ? Buffer.from(res.value).toString() : '未返回打印结果'
+        addPkgNumberMsg('mes', msg, 'info')
         ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
         }).catch(err => {
         })
