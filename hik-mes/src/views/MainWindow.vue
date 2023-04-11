@@ -196,8 +196,12 @@ const catchValidedBarcd = setInterval(() => {
         return
     }
     getReadyBarcdList()
-    ipcRenderer.send('log-msg-info', '!mesStatus.value || !tcpStatus.value:' + (!mesStatus.value || !tcpStatus.value))
-    if (!mesStatus.value || !tcpStatus.value) {
+    console.log('------------------')
+    console.log(tcpStatus.value)
+    console.log(mesStatus.value)
+    ipcRenderer.send('log-msg-info', 'mesStatus.value == false || tcpStatus.value == false:' + (!mesStatus.value || !tcpStatus.value))
+    ipcRenderer.send('log-msg-info', 'mesStatus.value == false || tcpStatus.value == false:' + (mesStatus.value == false || tcpStatus.value == false))
+    if (mesStatus.value == false || tcpStatus.value == false) {
         return
     }
     generatePkgNumber()
@@ -445,7 +449,7 @@ const reprintActive = function () {
  * 
  */
 const catchBarcd = setInterval(() => {
-    if (!workFlag.value || !plcStatus.value || !mesStatus || !tcpStatus) {
+    if (!workFlag.value || !plcStatus.value || !mesStatus.value || !tcpStatus.value) {
         return
     }
     catchBarcdFromPLC()
