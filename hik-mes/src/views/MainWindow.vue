@@ -290,7 +290,9 @@ const generatePkgNumber = function () {
             }
         }).catch(err => {
             console.error(err)
+            ipcRenderer.send('log-msg-info', 'sendBox match err' + JSON.stringify(err))
         })
+
         ipcRenderer.send('log-msg-info', 'pkgNumber result: ' + res.toString())
         pkgNumber.value = res.Data.PkgNumber
         //Barcd绑定PkgNumber，PkgStatus=1, 插入pkg_number_list
@@ -306,10 +308,10 @@ const generatePkgNumber = function () {
         ipcRenderer.send('log-msg-info', 'ready to print: ')
         readyToPrint(tempList[0].Aufnr, pkgNumber.value)
     }).catch(err => {
-        ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err.toString())
+        ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err.ErrMsg + JSON.stringify(err))
         addPkgNumberMsg('mes', '获取集成码失败:' + err.ErrMsg, 'error')
         resetWeightSignError()
-        runFlag.value = true
+        endPkgNumberTask()
         // console.error(err)
         // window.$message.error(err.ErrMsg)
     })
@@ -351,20 +353,22 @@ const readyToPrint = function (Aufnr, PkgNumber) {
             }).catch(err => {
             })
         }
-        weight.value = null
-        pkgNumber.value = null
-        pkgNumberStatus.value = false
-        runFlag.value = true
+        endPkgNumberTask()
     }).catch(err => {
         let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
         ipcRenderer.send('log-msg-info', errStr + err)
         addPkgNumberMsg('mes', '打印标签异常: 订单号:' + Aufnr + ' 包装号:' + PkgNumber + '失败，详细错误信息:' + JSON.stringify(err), 'error')
         resetWeightSignError()
-        weight.value = null
-        pkgNumber.value = null
-        pkgNumberStatus.value = false
-        runFlag.value = true
+        endPkgNumberTask()
     })
+}
+
+const endPkgNumberTask = function () {
+    runFlag.value = true
+    weight.value = null
+    pkgNumberStatus.value = false
+    pkgNumber.value = null
+    ipcRenderer.send('log-msg-info', 'task generatePkgNumber done reset the running flag')
 }
 
 //重新打印
