@@ -221,6 +221,7 @@ const queryReadyBarcdList = function () {
 }
 
 const querySendBox = function (param) {
+    log.info('select * from `send_box` order by `CreateTime` desc limit ? offset ?' + param)
     return new Promise((resolve, reject) => {
         pool.query(
             'select * from `send_box` order by `CreateTime` desc limit ? offset ?',
@@ -519,13 +520,15 @@ const searchBarcdList = function (param) {
     if (param[2] != null && param[3] != null) {
         part += ' and `CreateTime` > ? and `CreateTime` < ?'
     }
+    if (param[4] != null && param[5] != null) {
+        part += ' order by `CreateTime` desc limit ? offset ? '
+    }
     let params = []
     param.forEach(element => {
-        if (element != null && element != '') {
-            params.push(element)
+        if (element != null) {
+            params.push(element.toString())
         }
     });
-    // log.info('select * from `barcd_list` where `Deleted` = 0 ' + part)
     return new Promise((resolve, reject) => {
         pool.execute(
             'select * from `barcd_list` where `Deleted` = 0 ' + part,
@@ -539,6 +542,39 @@ const searchBarcdList = function (param) {
         )
     })
 }
+
+const countBarcdList = function (param) {
+    let part = ''
+    if (param[0] != null && param[0] != '') {
+        part += ' and `Barcd` = ? '
+    }
+    if (param[1] != null && param[1] != '') {
+        part += ' and `PkgNumber` = ? '
+    }
+    if (param[2] != null && param[3] != null) {
+        part += ' and `CreateTime` > ? and `CreateTime` < ?'
+    }
+    let params = []
+    param.forEach(element => {
+        if (element != null) {
+            params.push(element.toString())
+        }
+    });
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'select count(1) as `total` from `barcd_list` where `Deleted` = 0 ' + part,
+            params,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+
 
 export default {
     connect,
@@ -567,5 +603,6 @@ export default {
     deleteAllBarcd,
     deleteAllPkgNumber,
     searchBarcdList,
+    countBarcdList,
 
 }

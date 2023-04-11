@@ -474,7 +474,7 @@ const catchBarcdFromPLC = function () {
 
 //入库前判断是否重复
 const addBarcdToDB = function (barcdTemp) {
-    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify([barcdTemp, null, null, null])).then(res => {
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify([barcdTemp, null, null, null, null, null])).then(res => {
         // console.log(res)
         if (res.success) {
             if (res.value.length != 0) {

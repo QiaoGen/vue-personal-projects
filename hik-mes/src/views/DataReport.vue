@@ -24,6 +24,8 @@
         </div>
         <div style="padding:0px 10px;">
             <n-data-table striped bordered="true" :columns="columns" :data="data" :pagination="pagination" />
+            <n-pagination class="page" v-model:page="pageNo" :page-count="page.totalPage" simple
+                @update:page="changePage" />
         </div>
     </div>
 </template>
@@ -37,7 +39,15 @@ import { MdSearch } from '@vicons/ionicons4'
 import { ref, reactive, onBeforeUnmount } from 'vue'
 import dayjs from 'dayjs'
 import { ipcRenderer } from 'electron'
+import constant from '@/lib/constant'
 
+const pageNo = ref(1)
+const page = ref({
+    pageSize: 0,
+    totalPage: 0,
+    total: 0,
+    offset: 0
+})
 const data = ref([])
 const columns = reactive([
     {
@@ -79,21 +89,61 @@ const search = function () {
         param.push(dayjs(range.value[0]).startOf('d').format('YYYY-MM-DD HH:mm:ss'))
         param.push(dayjs(range.value[1]).endOf('d').format('YYYY-MM-DD HH:mm:ss'))
     }
-    ipcRenderer.send('mysql-msg', 'searchBarcdList', JSON.stringify(param))
-    console.log('search')
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.countBarcdList, JSON.stringify(param)).then(res => {
+        console.log(res)
+        let pageTemp = {
+            pageSize: 10,
+            totalPage: 0,
+            total: res.value[0].total,
+            offset: 0
+        }
+        pageTemp.totalPage = parseInt((pageTemp.total + pageTemp.pageSize - 1) / pageTemp.pageSize)
+        page.value = pageTemp
+        param.push(page.value.pageSize)
+        param.push(page.value.offset)
+        ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify(param)).then(arg => {
+            console.log(arg)
+            if (arg.success && arg.value.length != 0) {
+                arg.value.forEach(el => {
+                    el.ValidStatus = el.ValidStatus == 1 ? '已校验' : '未校验'
+                })
+                data.value = arg.value
+            }
+        }).catch(err => {
+            console.error(err)
+        })
+    })
 }
-ipcRenderer.on('searchBarcdList-reply', function (event, arg) {
-    if (arg.success) {
-        arg.msg.forEach(el => {
-            el.ValidStatus = el.ValidStatus == 1 ? '已校验' : '未校验'
-        });
-        data.value = arg.msg
-    }
-})
 
-onBeforeUnmount(() => {
-    ipcRenderer.removeAllListeners("searchBarcdList-reply")
-})
+const changePage = function (e) {
+    let offset = (e - 1) * page.value.pageSize
+    page.value.offset = offset
+    let param = [
+        barcd.value,
+        pkgNumber.value,
+    ]
+    if (range.value == null && model.value.barcd == null && model.value.pkgNumber == null) {
+        return
+    }
+    if (range.value != null) {
+        param.push(dayjs(range.value[0]).startOf('d').format('YYYY-MM-DD HH:mm:ss'))
+        param.push(dayjs(range.value[1]).endOf('d').format('YYYY-MM-DD HH:mm:ss'))
+    }
+    param.push(page.value.pageSize)
+    param.push(page.value.offset)
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.searchBarcdList, JSON.stringify(param)).then(arg => {
+        console.log(arg)
+        if (arg.success && arg.value.length != 0) {
+            arg.value.forEach(el => {
+                el.ValidStatus = el.ValidStatus == 1 ? '已校验' : '未校验'
+            })
+            data.value = arg.value
+        }
+    }).catch(err => {
+        console.error(err)
+    })
+
+}
 
 </script>
 
@@ -124,5 +174,9 @@ onBeforeUnmount(() => {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
+}
+
+.page {
+    margin-top: 10px;
 }
 </style>

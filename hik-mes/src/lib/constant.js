@@ -1,5 +1,6 @@
 const mysql = {
     searchBarcdList: 'searchBarcdList',
+    countBarcdList: 'countBarcdList',
     searchBarcdList_reply: 'searchBarcdList-reply',
     queryAllUser: 'queryAllUser',
     queryAllUser_reply: 'queryAllUser-reply',
@@ -139,6 +140,8 @@ const alarms = [
             "投盒机与称重机通讯异常",
             "投盒机与装箱机通讯异常",
             "投盒机伺服错误",
+            "投盒机放置次数变化请确认说明书跟换完成",
+            "投盒机当前放置次数为零，请选择单机确认投放次数"
         ]
     }, {
         machine: '贴标机', amount: 4, color: 'rgb(208,48,80)', content: [
@@ -159,8 +162,8 @@ const alarms = [
             "贴标机打印结束未检测到标签报警(2)",
             "贴标机取标后负压检测报警",
             "贴标机贴标板未检测到纸箱",
-            "贴标机打印机长时间无数据"
-
+            "贴标机打印机长时间无数据",
+            "贴标机打印机内存在缓存数据，请手动清除"
         ]
     }, {
         machine: '封箱机', amount: 2, color: 'rgb(138, 43, 226)', content: [

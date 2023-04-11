@@ -84,7 +84,7 @@ const handleValidateButtonClick = function (e) {
 const initConfigPage = function () {
     ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.countSendBox).then(res => {
         let pageTemp = {
-            pageSize: 15,
+            pageSize: 10,
             totalPage: 0,
             total: res.value[0].total,
             offset: 0
