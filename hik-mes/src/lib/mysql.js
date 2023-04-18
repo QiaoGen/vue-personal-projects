@@ -113,7 +113,7 @@ const initializeDB = function () {
                     + '     constraint send_box_Aufnr_uindex '
                     + '         unique (Aufnr) '
                     + ' ) '
-                    + ' comment 投盒机数量映射"; ',
+                    + ' comment "投盒机数量映射"; ',
                     function (err, results, fields) {
                         if (err) {
                             log.error(err)

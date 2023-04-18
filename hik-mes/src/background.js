@@ -51,7 +51,7 @@ ipcMain.handle('plc-msg-invoke', async (event, ...arg) => {
       break;
   }
   if (!result.success) {
-    log.info('plc try to reconnect times: ' + s7client.tryTimes)
+    log.info('plc receive error: ' + result.value)
   }
   return result
 })
