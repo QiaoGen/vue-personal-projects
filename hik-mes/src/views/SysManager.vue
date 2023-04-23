@@ -21,15 +21,19 @@
                     @click="handleValidateButtonClick">
                     提交
                 </n-button>
+
+
             </div>
+
         </n-form>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onBeforeUnmount } from 'vue'
 import { ipcRenderer } from 'electron'
 import store from '@/store'
+import constant from '@/lib/constant'
 const formRef = ref(null)
 
 const model = ref({

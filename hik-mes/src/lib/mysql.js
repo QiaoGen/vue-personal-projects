@@ -574,6 +574,36 @@ const countBarcdList = function (param) {
     })
 }
 
+const queryTest = function () {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'select * from test where Id = 1',
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
+
+const updateTest = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'update `test` set `status` = ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    reject(err)
+                }
+                resolve(results)
+            }
+        )
+    })
+}
+
 
 
 export default {
@@ -604,5 +634,6 @@ export default {
     deleteAllPkgNumber,
     searchBarcdList,
     countBarcdList,
-
+    queryTest,
+    updateTest
 }

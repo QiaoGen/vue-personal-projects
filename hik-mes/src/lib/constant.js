@@ -18,6 +18,8 @@ const mysql = {
     countSendBox: 'countSendBox',
     insertAndUpdateSendBox: 'insertAndUpdateSendBox',
     querySendBoxByAufnr: 'querySendBoxByAufnr',
+    queryTest: 'queryTest',
+    updateTest: 'updateTest'
 }
 
 const sysOperate = {

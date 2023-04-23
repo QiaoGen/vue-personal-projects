@@ -260,10 +260,12 @@ const getWeight = function () {
                 addPkgNumberMsg('plc', '读取称重标识位失败', 'error')
                 resetWeightSignError()
                 reject(false)
+                return
             }
             if (weightSignResult.value[0] == 0) {
                 //标识位为无
                 reject(false)
+                return
             }
             ipcRenderer.invoke('plc-msg-invoke', 'read', constant.plcCommand.weight).then(weightResult => {
                 // console.log(weightResult)
@@ -274,13 +276,17 @@ const getWeight = function () {
                     //称重标志位归位
                     resetWeightSign()
                     reslove(true)
+                    return
                 }
                 reject(false)
+                return
             }).catch(err => {
                 reject(false)
+                return
             })
         }).catch(err => {
             reject(false)
+            return
         })
     })
 }
@@ -311,6 +317,7 @@ const generatePkgNumber = function () {
         // //是否满100箱数据 //数量 >= 100 判断是否有重量 
         if (runFlag.value || readyBarcdList.value.length < 100 || weight.value == null) {
             reject(false)
+            return
         }
         runFlag.value = true
         pkgNumberStatus.value = true
@@ -359,8 +366,10 @@ const generatePkgNumber = function () {
             ipcRenderer.send('log-msg-info', 'ready to print: ')
             readyToPrint(tempList[0].Aufnr, pkgNumber.value).then(res => {
                 reslove(res)
+                return
             }).catch(err => {
                 reject(err)
+                return
             })
         }).catch(err => {
             ipcRenderer.send('log-msg-info', 'pkgNumber err result: ' + err.ErrMsg + JSON.stringify(err))
@@ -368,6 +377,7 @@ const generatePkgNumber = function () {
             resetWeightSignError()
             endPkgNumberTask()
             reject(false)
+            return
             // console.error(err)
             // window.$message.error(err.ErrMsg)
         })
@@ -394,6 +404,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
                     }).catch(err => {
                     })
                     reslove(true)
+                    return
                 } else {
                     //需要人工干预
                     addPkgNumberMsg('mes', '打印失败:' + resp.Result + ' 序列号:' + resp.Barcd, 'error')
@@ -414,6 +425,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
             }
             endPkgNumberTask()
             reject(false)
+            return
         }).catch(err => {
             let errStr = 'print Aufnr: ' + Aufnr + ' PkgNumber:' + PkgNumber + ' fail'
             ipcRenderer.send('log-msg-info', errStr + err)
@@ -421,6 +433,7 @@ const readyToPrint = function (Aufnr, PkgNumber) {
             resetWeightSignError()
             endPkgNumberTask()
             reject(false)
+            return
         })
     })
 }
@@ -498,6 +511,7 @@ const catchBarcdFromPLC = function () {
                 addBarcdMsg('plc', result.value, 'error')
                 console.error(result.value)
                 reject(false)
+                return
             }
             if (result.value[0] == 1) {
                 addBarcdMsg('plc', '读取Barcd序列号', 'info')
@@ -509,18 +523,22 @@ const catchBarcdFromPLC = function () {
                         plcBarcdSignError()
                         resetBarcdSign()
                         reject(false)
+                        return
                     } else {
                         barcd.value = barcdTemp
                         addBarcdToDB(barcdTemp).then(res => {
                             reslove(res)
+                            return
                         }).catch(err => {
                             reject(err)
+                            return
                         })
                     }
                 })
             }
         }).catch(err => {
             reject(false)
+            return
         })
     })
 
@@ -536,6 +554,7 @@ const addBarcdToDB = function (barcdTemp) {
                 plcBarcdSignError()
                 resetBarcdSign()
                 reject(false)
+                return
             }
             if (res.value.length != 0) {
                 let repeatFlag = false
@@ -550,22 +569,28 @@ const addBarcdToDB = function (barcdTemp) {
                     plcBarcdSignError()
                     resetBarcdSign()
                     reject(false)
+                    return
                 } else {
                     validBarcd(barcdTemp).then(res => {
                         reslove(res)
+                        return
                     }).catch(err => {
                         reject(err)
+                        return
                     })
                 }
             } else {
                 validBarcd(barcdTemp).then(res => {
                     reslove(res)
+                    return
                 }).catch(err => {
                     reject(err)
+                    return
                 })
             }
         }).catch(err => {
             reject(false)
+            return
         })
     })
 }
@@ -582,6 +607,7 @@ const validBarcd = function (barcd) {
                     resetBarcdSign()
                     addBarcdMsg('mes', '序列号:' + barcd + ',订单号:' + aufnr + ' 与订单号:' + readyBarcdList.value[0] + ' 存在切单,请手动处理', 'error')
                     reject(false)
+                    return
                 }
             }
             ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.insertBarcd, JSON.stringify([barcd, aufnr])).then(addRes => {
@@ -590,12 +616,14 @@ const validBarcd = function (barcd) {
             barcdStatus.value = true
             addBarcdMsg('mes', '订单号：' + aufnr + ' 序列号:' + barcd + ' ' + res.ErrMsg, 'info')
             reslove(true)
+            return
         }).catch(err => {
             mesValidMsg.value = 'MES校验失败：' + err.ErrMsg + " Code:" + err.ErrCode
             plcBarcdSignError()
             resetBarcdSign()
             addBarcdMsg('mes', err.ErrMsg, 'error')
             reject(false)
+            return
         })
     })
 }

@@ -4,6 +4,7 @@
       <n-button @click="updateUser" type="success" style="margin-bottom: 10px;">更新用户信息</n-button>
       <n-data-table :columns="columns" :data="data" />
     </div>
+    <!-- <n-button @click="updateStatus">修改</n-button> -->
   </div>
 </template>
 
@@ -14,6 +15,7 @@ import { ipcRenderer } from "electron";
 import constant from "@/lib/constant";
 import store from '@/store'
 import route from '@/router'
+// import { Mutex } from 'async-mutex'
 
 const role = computed(() => {
   return store.state.role
@@ -111,6 +113,49 @@ const updateUserSql = function (user) {
 const compare = function (e, i) {
   return e.name != i.name || e.password != i.password || e.username != i.username
 }
+
+
+// const mutex = new Mutex()
+
+// const updateStatus = function () {
+//   ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updateTest, JSON.stringify([1])).then(res => {
+//     console.log("update ")
+//   }).catch(err => {
+//     console.log(err)
+//   })
+// }
+
+const testFun = function () {
+  return new Promise((reslove, reject) => {
+    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryTest).then(res => {
+      if (res.value[0].status == 0) {
+        reject(false)
+        return
+      }
+      console.log('read:', res.value[0].status)
+      ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updateTest, JSON.stringify([0])).then(res1 => {
+        console.log("change")
+        reslove(true)
+      })
+    })
+  })
+}
+
+// var test = setInterval(() => {
+//   // testFun().then(res => { }).catch(err => { })
+//   mutex.acquire()
+//     .then(function (release) {
+//       testFun().then(res =>
+//         release()
+//       ).catch(err => {
+//         release()
+//       })
+//     });
+// }, 1)
+
+// onBeforeUnmount(() => {
+//   clearInterval(test)
+// })
 
 </script>
 
