@@ -158,12 +158,28 @@ const catchAlarm = setInterval(() => {
 }, 1000)
 // -------
 
+const clearData = function () {
+  let time = dayjs(new Date()).subtract(3, 'month').format('YYYY-MM-DD HH:mm:ss')
+  console.log('time:', time)
+  ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.clearData, JSON.stringify([time])).then(res => {
+    console.log('clearData:', res)
+  }).catch(err => {
+    console.error('clearData faild:', err)
+  })
+}
+
+//定时清除缓存数据
+const clearDataInterval = setInterval(() => {
+  clearData()
+}, 7200000)
+
 
 // 移除监听器
 onBeforeUnmount(() => {
   // ipcRenderer.removeAllListener('sysInfo-reply')
   clearInterval(heartbeat)
   clearInterval(catchAlarm)
+  clearInterval(clearDataInterval)
 })
 </script>
 

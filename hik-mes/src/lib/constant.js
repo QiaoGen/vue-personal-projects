@@ -19,7 +19,8 @@ const mysql = {
     insertAndUpdateSendBox: 'insertAndUpdateSendBox',
     querySendBoxByAufnr: 'querySendBoxByAufnr',
     queryTest: 'queryTest',
-    updateTest: 'updateTest'
+    updateTest: 'updateTest',
+    clearData: 'clearData'
 }
 
 const sysOperate = {

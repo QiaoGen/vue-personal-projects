@@ -184,6 +184,16 @@ ipcMain.handle('mysql-msg-invoke', async (event, ...arg) => {
         log.error('数据库异常' + err)
       })
       break;
+    case constant.mysql.clearData:
+      await mysql.clearData(JSON.parse(arg[1])).then(res => {
+        result.success = true
+        result.value = res
+      }).catch(err => {
+        result.msg = err
+        result.success = false
+        log.error('数据库异常' + err)
+      })
+      break;
     case constant.mysql.queryTest:
       await mysql.queryTest().then(res => {
         result.success = true

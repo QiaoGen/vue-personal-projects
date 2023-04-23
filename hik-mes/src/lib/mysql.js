@@ -30,7 +30,7 @@ const connect = function () {
 const disconnect = function () { }
 
 
-//索引创建语句必须跟在table后， 不可以换行
+//索引创建语句必须跟在table后， 不可以换行  
 const initializeDB = function () {
     log.info('initializeDB')
     pool.execute(
@@ -123,6 +123,39 @@ const initializeDB = function () {
             }
         }
     )
+}
+
+const clearData = function (param) {
+    return new Promise((resolve, reject) => {
+        pool.execute(
+            'delete from barcd_list where CreateTime < ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    log.error(err)
+                }
+            }
+        )
+        pool.execute(
+            'delete from pkg_number_list where CreateTime < ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    log.error(err)
+                }
+            }
+        )
+        pool.execute(
+            'delete from alarm where CreateTime < ?',
+            param,
+            function (err, results, fields) {
+                if (err) {
+                    log.error(err)
+                }
+            }
+        )
+        resolve(true)
+    })
 }
 
 const insertBarcd = function (param) {
@@ -635,5 +668,6 @@ export default {
     searchBarcdList,
     countBarcdList,
     queryTest,
-    updateTest
+    updateTest,
+    clearData
 }
