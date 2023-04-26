@@ -403,12 +403,16 @@ const readyToPrint = function (Aufnr, PkgNumber) {
                     ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updatePkgNumberPrintStatus, JSON.stringify([PkgNumber, Aufnr])).then(res => {
                     }).catch(err => {
                     })
+                    endPkgNumberTask()
                     reslove(true)
                     return
                 } else {
                     //需要人工干预
                     addPkgNumberMsg('mes', '打印失败:' + resp.Result + ' 序列号:' + resp.Barcd, 'error')
                     resetWeightSignError()
+                    endPkgNumberTask()
+                    reslove(true)
+                    return
                 }
             } else if (res.success == false) {
                 //返回错误数据
@@ -535,6 +539,9 @@ const catchBarcdFromPLC = function () {
                         })
                     }
                 })
+            } else {
+                reject(false)
+                return
             }
         }).catch(err => {
             reject(false)

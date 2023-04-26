@@ -125,21 +125,21 @@ const compare = function (e, i) {
 //   })
 // }
 
-const testFun = function () {
-  return new Promise((reslove, reject) => {
-    ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryTest).then(res => {
-      if (res.value[0].status == 0) {
-        reject(false)
-        return
-      }
-      console.log('read:', res.value[0].status)
-      ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updateTest, JSON.stringify([0])).then(res1 => {
-        console.log("change")
-        reslove(true)
-      })
-    })
-  })
-}
+// const testFun = function () {
+//   return new Promise((reslove, reject) => {
+//     ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.queryTest).then(res => {
+//       if (res.value[0].status == 0) {
+//         reject(false)
+//         return
+//       }
+//       console.log('read:', res.value[0].status)
+//       ipcRenderer.invoke('mysql-msg-invoke', constant.mysql.updateTest, JSON.stringify([0])).then(res1 => {
+//         console.log("change")
+//         reslove(true)
+//       })
+//     })
+//   })
+// }
 
 // var test = setInterval(() => {
 //   // testFun().then(res => { }).catch(err => { })
