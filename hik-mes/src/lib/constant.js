@@ -87,7 +87,9 @@ const alarms = [
             "泡罩扫码结果重复或上位机反馈异常",
             "称重后MES反馈错误",
             "泡罩机剔除满料报警",
-            "上位机通讯异常报警检查软件是否运行"
+            "上位机通讯异常报警检查软件是否运行",
+            "泡罩分离卡料 手动清空",
+            "泡罩长时间未放置完成  请检查是否无料或卡料"
         ]
     },
     {
@@ -124,7 +126,10 @@ const alarms = [
             "装箱机与称重机通讯异常",
             "装箱机与开箱机通讯异常",
             "",
-            "装箱机隔板缺料提示"
+            "装箱机隔板缺料提示",
+            "产品编组位满料，请人工检查传感器后启动",
+            "产品编组推料次数为零,实际产品未清空",
+            "产品数量计数和实际数量不符，请人工确认"
         ]
     }, {
         machine: '投盒机', amount: 4, color: 'rgb(240,160,32)', content: [
@@ -144,7 +149,8 @@ const alarms = [
             "投盒机与装箱机通讯异常",
             "投盒机伺服错误",
             "投盒机放置次数变化请确认说明书跟换完成",
-            "投盒机当前放置次数为零，请选择单机确认投放次数"
+            "投盒机当前放置次数为零，请选择单机确认投放次数",
+            "长时间未接收到上位机数据，请检查MES系统"
         ]
     }, {
         machine: '贴标机', amount: 4, color: 'rgb(208,48,80)', content: [
@@ -197,7 +203,8 @@ const alarms = [
             "开箱机折后盖前后限检测异常",
             "开箱机左折侧盖上升检测异常",
             "开箱机马达过载报警",
-            "开箱机紧急停止按下"
+            "开箱机紧急停止按下",
+            "吸盘负压报警"
         ]
     }
 ]
@@ -221,7 +228,7 @@ const plcCommand = !isDevelopment ? {
     sendBox: { area: areas.M, wordLen: wordLens.byte, start: 704, amount: 2, desc: '放置数量', name: 'sendBox' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
-    realtimeNum: { area: areas.M, wordLen: wordLens.byte, start: 800, amount: 2, desc: '实时工单数量', name: 'realtimeNum' },
+    realtimeNum: { area: areas.M, wordLen: wordLens.byte, start: 706, amount: 2, desc: '实时工单数量', name: 'realtimeNum' },
 } : {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
