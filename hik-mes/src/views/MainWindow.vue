@@ -116,6 +116,7 @@ const showModal = ref(false)
 const printPkgNumber = ref(null)
 const pkgData = ref([])
 const checkedRowKeysRef = ref([])
+const realtimeNum = ref(null)//实时发送上位机存储的数量
 const columns = ref([
     {
         type: "selection",
@@ -189,6 +190,17 @@ const selectAllReadyValidBarcd = function (e) {
     }
     readyValidBarcd.value = li
 }
+
+//数量校验
+const realtimeNumTask = setInterval(() => {
+    if (!workFlag.value || !plcStatus.value || realtimeNum.value == null) {
+        return
+    }
+    ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.realtimeNum, utils.getInt16Bytes(realtimeNum.value)).then(res => {
+    }).catch(err => {
+    })
+}, 50);
+
 
 /**
  * 1.获取产品序列号标识位
@@ -502,6 +514,7 @@ const reprintActive = function () {
         })
     })
     showModal.value = false
+    endPkgNumberTask()
 }
 
 
@@ -719,6 +732,7 @@ const clearAll = function () {
 //ipcRenderer.on
 ipcRenderer.on('queryReadyBarcdList-reply', function (event, arg) {
     readyBarcdList.value = arg
+    realtimeNum.value = readyBarcdList.value.length
 })
 ipcRenderer.on('deleteAllBarcd-reply', function (event, arg) {
     if (arg.success) {
@@ -757,6 +771,7 @@ onBeforeUnmount(() => {
     ipcRenderer.removeAllListeners()
     clearInterval(catchBarcd)
     clearInterval(catchValidedBarcd)
+    clearInterval(realtimeNumTask)
 })
 
 </script>

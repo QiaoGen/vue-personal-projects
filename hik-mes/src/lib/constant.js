@@ -221,6 +221,7 @@ const plcCommand = !isDevelopment ? {
     sendBox: { area: areas.M, wordLen: wordLens.byte, start: 704, amount: 2, desc: '放置数量', name: 'sendBox' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 4809, amount: 1, desc: 'mes集成码错误', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1500, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
+    realtimeNum: { area: areas.M, wordLen: wordLens.byte, start: 800, amount: 2, desc: '实时工单数量', name: 'realtimeNum' },
 } : {
     barcdSign: { area: areas.M, wordLen: wordLens.bit, start: 48, amount: 1, desc: '序列号标识位', reply: 'barcdSign_reply', name: 'barcdSign' },
     barcdSignError: { area: areas.M, wordLen: wordLens.bit, start: 49, amount: 1, desc: '序列号错误标识位', reply: 'barcdSignError_reply', name: 'barcdSignError' },
@@ -231,6 +232,7 @@ const plcCommand = !isDevelopment ? {
     sendBox: { area: areas.M, wordLen: wordLens.byte, start: 21, amount: 2, desc: '放置数量', name: 'sendBox' },
     pkgNumberError: { area: areas.M, wordLen: wordLens.bit, start: 489, amount: 1, desc: 'mes集成码错误', reply: '', name: 'pkgNumberError' },
     alarm: { area: areas.M, wordLen: wordLens.byte, start: 1, amount: alarmAmount, desc: '告警信息', name: 'alarm' },
+    realtimeNum: { area: areas.M, wordLen: wordLens.byte, start: 30, amount: 2, desc: '实时工单数量', name: 'realtimeNum' },
 }
 
 export default {
