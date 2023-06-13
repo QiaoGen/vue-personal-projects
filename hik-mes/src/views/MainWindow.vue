@@ -199,7 +199,7 @@ const realtimeNumTask = setInterval(() => {
     ipcRenderer.invoke('plc-msg-invoke', 'write', constant.plcCommand.realtimeNum, utils.getInt16Bytes(realtimeNum.value)).then(res => {
     }).catch(err => {
     })
-}, 50);
+}, 500);
 
 
 /**
@@ -276,6 +276,12 @@ const getWeight = function () {
             }
             if (weightSignResult.value[0] == 0) {
                 //标识位为无
+                reject(false)
+                return
+            }
+            //补充，数量小于100，拒绝接收重量数据
+            if (readyBarcdList.value.length < 100) {
+                weight.value = null
                 reject(false)
                 return
             }
